@@ -1,0 +1,2434 @@
+[
+  {
+    "id": "0b59bc47-351b-4429-ace2-36d197fec06e",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def get_item():\n    my_list = [1, 2, 3]\n    return my_list[5] # out of bounds\n\nget_item()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_1.py\", line 5, in <module>\n    get_item()\n    ~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_1.py\", line 3, in get_item\n    return my_list[5] # out of bounds\n           ~~~~~~~^^^\nIndexError: list index out of range\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_1.py",
+        "line": 3,
+        "severity": "error",
+        "error_type": "IndexError",
+        "message": "list index out of range",
+        "raw_error": "IndexError: list index out of range"
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "d0b65ecd-e016-496e-82d9-4e05119d3a61",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def traverse_matrix():\n    matrix = [[1, 2], [3, 4]]\n    return matrix[2][0] # out of bounds\n\ntraverse_matrix()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_2.py\", line 5, in <module>\n    traverse_matrix()\n    ~~~~~~~~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_2.py\", line 3, in traverse_matrix\n    return matrix[2][0] # out of bounds\n           ~~~~~~^^^\nIndexError: list index out of range\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\array_out_of_bounds_2.py",
+        "line": 3,
+        "severity": "error",
+        "error_type": "IndexError",
+        "message": "list index out of range",
+        "raw_error": "IndexError: list index out of range"
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "05ae5504-848e-42f7-8f36-7a083a51ca4e",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def greet():\nprint(\"Hello\") # IndentationError\n\ngreet()\n",
+    "error_raw": "  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\indentation_logic_1.py\", line 2\n    print(\"Hello\") # IndentationError\n    ^^^^^\nIndentationError: expected an indented block after function definition on line 1\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "unknown",
+        "line": 0,
+        "severity": "error",
+        "error_type": "IndentationError",
+        "message": "expected an indented block after function definition on line 1",
+        "raw_error": "IndentationError: expected an indented block after function definition on line 1"
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "e5df1fd3-b84c-4bc6-bbd8-539251df0fad",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def do_something():\n    x = 1\n     y = 2 # IndentationError\n    return x + y\n\ndo_something()\n",
+    "error_raw": "  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\indentation_logic_2.py\", line 3\n    y = 2 # IndentationError\nIndentationError: unexpected indent\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "unknown",
+        "line": 0,
+        "severity": "error",
+        "error_type": "IndentationError",
+        "message": "unexpected indent",
+        "raw_error": "IndentationError: unexpected indent"
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "d9103c3e-dead-46be-9f58-53cd620d10ef",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def count_down(n):\n    while n > 0:\n        print(n)\n        # Missing n -= 1\n        if n == 5:\n            raise RecursionError(\"infinite loop simulated\") # forcefully raise so timeout doesn't just silence it as unknown\ncount_down(5)\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_1.py\", line 7, in <module>\n    count_down(5)\n    ~~~~~~~~~~^^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_1.py\", line 6, in count_down\n    raise RecursionError(\"infinite loop simulated\") # forcefully raise so timeout doesn't just silence it as unknown\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRecursionError: infinite loop simulated\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_1.py",
+        "line": 6,
+        "severity": "error",
+        "error_type": "RecursionError",
+        "message": "infinite loop simulated",
+        "raw_error": "RecursionError: infinite loop simulated"
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "458e0198-ae02-4262-9848-bb0684840a91",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def find_item():\n    i = 0\n    while True:\n        if i == -1:\n            break\n        i += 1\n        if i > 1000:\n            raise RecursionError(\"infinite loop simulated\")\nfind_item()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_2.py\", line 9, in <module>\n    find_item()\n    ~~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_2.py\", line 8, in find_item\n    raise RecursionError(\"infinite loop simulated\")\nRecursionError: infinite loop simulated\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\infinite_loop_2.py",
+        "line": 8,
+        "severity": "error",
+        "error_type": "RecursionError",
+        "message": "infinite loop simulated",
+        "raw_error": "RecursionError: infinite loop simulated"
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "6a403db9-daae-452b-b05e-ebf96f33d967",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def check_val(x):\n    if x = 5: # SyntaxError\n        pass\n\ncheck_val(5)\n",
+    "error_raw": "  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\logical_operator_confusion_1.py\", line 2\n    if x = 5: # SyntaxError\n       ^^^^^\nSyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "unknown",
+        "line": 0,
+        "severity": "error",
+        "error_type": "SyntaxError",
+        "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='?",
+        "raw_error": "SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?"
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "40141ab3-5af0-4d1e-a28e-4bc953aa9f6f",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def check_both(a, b):\n    if a == 1 and or b == 2: # SyntaxError\n        pass\n\ncheck_both(1, 2)\n",
+    "error_raw": "  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\logical_operator_confusion_2.py\", line 2\n    if a == 1 and or b == 2: # SyntaxError\n                  ^^\nSyntaxError: invalid syntax\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "unknown",
+        "line": 0,
+        "severity": "error",
+        "error_type": "SyntaxError",
+        "message": "invalid syntax",
+        "raw_error": "SyntaxError: invalid syntax"
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "fa5d917a-bf58-49d1-8fc2-aa8242c4ac7a",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def calculate_area(w, h):\n    area = w * h\n    # Missing return\n\nresult = calculate_area(5, 5)\nif result > 20: # TypeError because result is None\n    print(\"Big\")\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\missing_return_1.py\", line 6, in <module>\n    if result > 20: # TypeError because result is None\n       ^^^^^^^^^^^\nTypeError: '>' not supported between instances of 'NoneType' and 'int'\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\missing_return_1.py",
+        "line": 6,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "'>' not supported between instances of 'NoneType' and 'int'",
+        "raw_error": "TypeError: '>' not supported between instances of 'NoneType' and 'int'"
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "e504f144-bc61-4b9b-a444-2418162ec1fd",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def get_config():\n    # missing return\n    pass\n\nconf = get_config()\nprint(conf[\"host\"]) # TypeError: 'NoneType' object is not subscriptable\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\missing_return_2.py\", line 6, in <module>\n    print(conf[\"host\"]) # TypeError: 'NoneType' object is not subscriptable\n          ~~~~^^^^^^^^\nTypeError: 'NoneType' object is not subscriptable\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\missing_return_2.py",
+        "line": 6,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "'NoneType' object is not subscriptable",
+        "raw_error": "TypeError: 'NoneType' object is not subscriptable"
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "446aa3ed-2b0c-4e0c-b6cb-ff7237cd1a7d",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def get_last_element(lst):\n    return lst[len(lst)] # Off by one\n\nget_last_element([1, 2, 3])\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_1.py\", line 4, in <module>\n    get_last_element([1, 2, 3])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_1.py\", line 2, in get_last_element\n    return lst[len(lst)] # Off by one\n           ~~~^^^^^^^^^^\nIndexError: list index out of range\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_1.py",
+        "line": 2,
+        "severity": "error",
+        "error_type": "IndexError",
+        "message": "list index out of range",
+        "raw_error": "IndexError: list index out of range"
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "6e6a20f0-c9d4-476c-aea2-68d8b731d763",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def loop_array():\n    arr = [10, 20, 30]\n    for i in range(4): # Off by one\n        print(arr[i])\n\nloop_array()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_2.py\", line 6, in <module>\n    loop_array()\n    ~~~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_2.py\", line 4, in loop_array\n    print(arr[i])\n          ~~~^^^\nIndexError: list index out of range\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\off_by_one_2.py",
+        "line": 4,
+        "severity": "error",
+        "error_type": "IndexError",
+        "message": "list index out of range",
+        "raw_error": "IndexError: list index out of range"
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "a5616a13-b25a-4ca8-897e-6ef6f598fc64",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def check_age(age):\n    if age > 18:\n        return True\n    elif age > 18: # Redundant\n        return False\n\n# Forcing an error for the parser to catch\nraise ValueError(\"Redundant Condition\")\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\redundant_condition_1.py\", line 8, in <module>\n    raise ValueError(\"Redundant Condition\")\nValueError: Redundant Condition\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\redundant_condition_1.py",
+        "line": 8,
+        "severity": "error",
+        "error_type": "ValueError",
+        "message": "Redundant Condition",
+        "raw_error": "ValueError: Redundant Condition"
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "5e3ee9dc-f66e-4b1c-b9fe-ba0a6aa3c5eb",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def check_status(status):\n    if status == \"active\" and status == \"active\": # Redundant\n        pass\n\nraise ValueError(\"Redundant Condition\")\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\redundant_condition_2.py\", line 5, in <module>\n    raise ValueError(\"Redundant Condition\")\nValueError: Redundant Condition\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\redundant_condition_2.py",
+        "line": 5,
+        "severity": "error",
+        "error_type": "ValueError",
+        "message": "Redundant Condition",
+        "raw_error": "ValueError: Redundant Condition"
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "af05cb28-2b78-4cfc-91d0-9bc5e323aa79",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def combine(a, b):\n    return a + b\n\ncombine(\"Hello\", 5) # TypeError\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_1.py\", line 4, in <module>\n    combine(\"Hello\", 5) # TypeError\n    ~~~~~~~^^^^^^^^^^^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_1.py\", line 2, in combine\n    return a + b\n           ~~^~~\nTypeError: can only concatenate str (not \"int\") to str\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_1.py",
+        "line": 2,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "can only concatenate str (not \"int\") to str",
+        "raw_error": "TypeError: can only concatenate str (not \"int\") to str"
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "147bbdc9-2416-450e-bcbe-e306fbec48fc",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def multiply(text, times):\n    return text * str(times) # TypeError\n\nmultiply(\"A\", \"3\")\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_2.py\", line 4, in <module>\n    multiply(\"A\", \"3\")\n    ~~~~~~~~^^^^^^^^^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_2.py\", line 2, in multiply\n    return text * str(times) # TypeError\n           ~~~~~^~~~~~~~~~~~\nTypeError: can't multiply sequence by non-int of type 'str'\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\type_mismatch_2.py",
+        "line": 2,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "can't multiply sequence by non-int of type 'str'",
+        "raw_error": "TypeError: can't multiply sequence by non-int of type 'str'"
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "1d2c40ea-9cc9-4434-a9a8-6cf874c53d70",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def calc_sum():\n    for i in range(5):\n        total += i # total uninitialized\n    return total\n\ncalc_sum()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_1.py\", line 6, in <module>\n    calc_sum()\n    ~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_1.py\", line 3, in calc_sum\n    total += i # total uninitialized\n    ^^^^^\nUnboundLocalError: cannot access local variable 'total' where it is not associated with a value\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_1.py",
+        "line": 3,
+        "severity": "error",
+        "error_type": "UnboundLocalError",
+        "message": "cannot access local variable 'total' where it is not associated with a value",
+        "raw_error": "UnboundLocalError: cannot access local variable 'total' where it is not associated with a value"
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "4538bc43-9e12-4c2b-b684-94acb7cdffd0",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def print_name():\n    if False:\n        name = \"Bob\"\n    print(name) # name uninitialized\n\nprint_name()\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_2.py\", line 6, in <module>\n    print_name()\n    ~~~~~~~~~~^^\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_2.py\", line 4, in print_name\n    print(name) # name uninitialized\n          ^^^^\nUnboundLocalError: cannot access local variable 'name' where it is not associated with a value\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\uninitialized_variable_2.py",
+        "line": 4,
+        "severity": "error",
+        "error_type": "UnboundLocalError",
+        "message": "cannot access local variable 'name' where it is not associated with a value",
+        "raw_error": "UnboundLocalError: cannot access local variable 'name' where it is not associated with a value"
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "081683b8-0b54-42d2-8298-3258e475e8a1",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def add_numbers(a, b):\n    return str(a + b) # Returns string instead of int\n\nresult = add_numbers(5, 5)\nif result > 0: # TypeError\n    print(\"Positive\")\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\wrong_return_type_1.py\", line 5, in <module>\n    if result > 0: # TypeError\n       ^^^^^^^^^^\nTypeError: '>' not supported between instances of 'str' and 'int'\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\wrong_return_type_1.py",
+        "line": 5,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "'>' not supported between instances of 'str' and 'int'",
+        "raw_error": "TypeError: '>' not supported between instances of 'str' and 'int'"
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "818ce861-1fc2-4b46-a4a9-14b5ed048eb6",
+    "source": "synthetic",
+    "language": "python",
+    "code": "def is_even(n):\n    if n % 2 == 0:\n        return \"yes\" # returns str instead of bool\n    return \"no\"\n\nif is_even(4) == True: # logic fails or type error elsewhere\n    pass\nelse:\n    raise TypeError(\"Expected boolean, got string\") # force an error for the parser\n",
+    "error_raw": "Traceback (most recent call last):\n  File \"C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\wrong_return_type_2.py\", line 9, in <module>\n    raise TypeError(\"Expected boolean, got string\") # force an error for the parser\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Expected boolean, got string\n",
+    "error_normalized": [
+      {
+        "language": "python",
+        "file": "C:\\Users\\Pramukh\\Music\\final_yr_project\\data\\synthetic\\python\\wrong_return_type_2.py",
+        "line": 9,
+        "severity": "error",
+        "error_type": "TypeError",
+        "message": "Expected boolean, got string",
+        "raw_error": "TypeError: Expected boolean, got string"
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: list index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: list index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: tuple index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: tuple index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: string index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: string index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: range object index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: range object index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: pop index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: pop index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: pop from empty list",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: pop from empty list",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: list assignment index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: list assignment index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: bytearray index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: bytearray index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "ValueError: substring not found",
+    "error_normalized": [
+      {
+        "error_type": "ValueError",
+        "message": "ValueError: substring not found",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: string index out of bounds",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: string index out of bounds",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: array index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: array index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: deque index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: deque index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_off_by_one_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: list index out of bounds",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: list index out of bounds",
+        "line": null
+      }
+    ],
+    "concept_label": "off_by_one",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'x' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'x' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'total' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'total' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'count' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'count' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'result' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'result' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'i' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'i' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'data' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'data' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'value' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'value' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "NameError: name 'temp' is not defined",
+    "error_normalized": [
+      {
+        "error_type": "NameError",
+        "message": "NameError: name 'temp' is not defined",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "UnboundLocalError: local variable 'x' referenced before assignment",
+    "error_normalized": [
+      {
+        "error_type": "UnboundLocalError",
+        "message": "UnboundLocalError: local variable 'x' referenced before assignment",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "UnboundLocalError: local variable 'total' referenced before assignment",
+    "error_normalized": [
+      {
+        "error_type": "UnboundLocalError",
+        "message": "UnboundLocalError: local variable 'total' referenced before assignment",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "UnboundLocalError: local variable 'count' referenced before assignment",
+    "error_normalized": [
+      {
+        "error_type": "UnboundLocalError",
+        "message": "UnboundLocalError: local variable 'count' referenced before assignment",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "UnboundLocalError: local variable 'result' referenced before assignment",
+    "error_normalized": [
+      {
+        "error_type": "UnboundLocalError",
+        "message": "UnboundLocalError: local variable 'result' referenced before assignment",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_uninitialized_variable_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "UnboundLocalError: cannot access local variable 'val' where it is not associated with a value",
+    "error_normalized": [
+      {
+        "error_type": "UnboundLocalError",
+        "message": "UnboundLocalError: cannot access local variable 'val' where it is not associated with a value",
+        "line": null
+      }
+    ],
+    "concept_label": "uninitialized_variable",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: expected str, bytes or os.PathLike object, not int",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: expected str, bytes or os.PathLike object, not int",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: expected str, bytes or os.PathLike object, not list",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: expected str, bytes or os.PathLike object, not list",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: list indices must be integers or slices, not str",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: list indices must be integers or slices, not str",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: list indices must be integers or slices, not float",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: list indices must be integers or slices, not float",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: string indices must be integers",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: string indices must be integers",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: tuple indices must be integers or slices, not str",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: tuple indices must be integers or slices, not str",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: integer argument expected, got float",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: integer argument expected, got float",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: a bytes-like object is required, not 'str'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: a bytes-like object is required, not 'str'",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'int' object is not iterable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'int' object is not iterable",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'float' object is not iterable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'float' object is not iterable",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: expected string or bytes-like object",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: expected string or bytes-like object",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: can only join an iterable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: can only join an iterable",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: Expected boolean, got string",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: Expected boolean, got string",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_wrong_return_type_13",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: '>' not supported between instances of 'str' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: '>' not supported between instances of 'str' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "wrong_return_type",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: index 5 is out of bounds for axis 0 with size 3",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: index 5 is out of bounds for axis 0 with size 3",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: index 10 is out of bounds for axis 1 with size 5",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: index 10 is out of bounds for axis 1 with size 5",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: invalid index to scalar variable.",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: invalid index to scalar variable.",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: too many indices for array",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: too many indices for array",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: index out of bounds",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: index out of bounds",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: arrays used as indices must be of integer (or boolean) type",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: arrays used as indices must be of integer (or boolean) type",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: shape mismatch: indexing arrays could not be broadcast together",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: shape mismatch: indexing arrays could not be broadcast together",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_array_out_of_bounds_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndexError: sequence index out of range",
+    "error_normalized": [
+      {
+        "error_type": "IndexError",
+        "message": "IndexError: sequence index out of range",
+        "line": null
+      }
+    ],
+    "concept_label": "array_out_of_bounds",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RecursionError: maximum recursion depth exceeded",
+    "error_normalized": [
+      {
+        "error_type": "RecursionError",
+        "message": "RecursionError: maximum recursion depth exceeded",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RecursionError: maximum recursion depth exceeded in comparison",
+    "error_normalized": [
+      {
+        "error_type": "RecursionError",
+        "message": "RecursionError: maximum recursion depth exceeded in comparison",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RecursionError: maximum recursion depth exceeded while calling a Python object",
+    "error_normalized": [
+      {
+        "error_type": "RecursionError",
+        "message": "RecursionError: maximum recursion depth exceeded while calling a Python object",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RecursionError: maximum recursion depth exceeded while getting the str of an object",
+    "error_normalized": [
+      {
+        "error_type": "RecursionError",
+        "message": "RecursionError: maximum recursion depth exceeded while getting the str of an object",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "MemoryError",
+    "error_normalized": [
+      {
+        "error_type": "Error",
+        "message": "MemoryError",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "MemoryError: memory allocation failed",
+    "error_normalized": [
+      {
+        "error_type": "MemoryError",
+        "message": "MemoryError: memory allocation failed",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TimeoutError: execution exceeded time limit",
+    "error_normalized": [
+      {
+        "error_type": "TimeoutError",
+        "message": "TimeoutError: execution exceeded time limit",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TimeoutError: process took too long to complete",
+    "error_normalized": [
+      {
+        "error_type": "TimeoutError",
+        "message": "TimeoutError: process took too long to complete",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "KeyboardInterrupt",
+    "error_normalized": [
+      {
+        "error_type": "Error",
+        "message": "KeyboardInterrupt",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RecursionError: infinite loop simulated",
+    "error_normalized": [
+      {
+        "error_type": "RecursionError",
+        "message": "RecursionError: infinite loop simulated",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "RuntimeError: maximum recursion depth exceeded",
+    "error_normalized": [
+      {
+        "error_type": "RuntimeError",
+        "message": "RuntimeError: maximum recursion depth exceeded",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_infinite_loop_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TimeoutError: Script execution timed out",
+    "error_normalized": [
+      {
+        "error_type": "TimeoutError",
+        "message": "TimeoutError: Script execution timed out",
+        "line": null
+      }
+    ],
+    "concept_label": "infinite_loop",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: unexpected indent",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: unexpected indent",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: unindent does not match any outer indentation level",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: unindent does not match any outer indentation level",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'if' statement on line 10",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'if' statement on line 10",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'for' statement",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'for' statement",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after function definition",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after function definition",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TabError: inconsistent use of tabs and spaces in indentation",
+    "error_normalized": [
+      {
+        "error_type": "TabError",
+        "message": "TabError: inconsistent use of tabs and spaces in indentation",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'while' statement",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'while' statement",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'def' statement",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'def' statement",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'try' statement",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'try' statement",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: expected an indented block after 'except' statement",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: expected an indented block after 'except' statement",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_indentation_logic_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "IndentationError: unexpected unindent",
+    "error_normalized": [
+      {
+        "error_type": "IndentationError",
+        "message": "IndentationError: unexpected unindent",
+        "line": null
+      }
+    ],
+    "concept_label": "indentation_logic",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: can only concatenate str (not \"int\") to str",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: can only concatenate str (not \"int\") to str",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: can only concatenate list (not \"str\") to list",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: can only concatenate list (not \"str\") to list",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for -: 'str' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for -: 'str' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for *: 'list' and 'float'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for *: 'list' and 'float'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for /: 'str' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for /: 'str' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for ** or pow(): 'str' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for ** or pow(): 'str' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'list' object cannot be interpreted as an integer",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'list' object cannot be interpreted as an integer",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'str' object cannot be interpreted as an integer",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'str' object cannot be interpreted as an integer",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: must be str, not int",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: must be str, not int",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: can't multiply sequence by non-int of type 'float'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: can't multiply sequence by non-int of type 'float'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: can't multiply sequence by non-int of type 'str'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: can't multiply sequence by non-int of type 'str'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: bad operand type for unary -: 'str'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: bad operand type for unary -: 'str'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_type_mismatch_13",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: bad operand type for unary ~: 'float'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: bad operand type for unary ~: 'float'",
+        "line": null
+      }
+    ],
+    "concept_label": "type_mismatch",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: invalid syntax",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: invalid syntax",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: can't assign to literal",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: can't assign to literal",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: can't assign to operator",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: can't assign to operator",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: can't assign to function call",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: can't assign to function call",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'bool' object is not iterable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'bool' object is not iterable",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: expected ':'",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: expected ':'",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: invalid character in identifier",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: invalid character in identifier",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: EOL while scanning string literal",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: EOL while scanning string literal",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: EOF while scanning triple-quoted string literal",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: EOF while scanning triple-quoted string literal",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: unmatched ')'",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: unmatched ')'",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: unmatched ']'",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: unmatched ']'",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: unmatched '}'",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: unmatched '}'",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: unexpected EOF while parsing",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: unexpected EOF while parsing",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_logical_operator_confusion_13",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "ValueError: truth value of an array with more than one element is ambiguous",
+    "error_normalized": [
+      {
+        "error_type": "ValueError",
+        "message": "ValueError: truth value of an array with more than one element is ambiguous",
+        "line": null
+      }
+    ],
+    "concept_label": "logical_operator_confusion",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'NoneType' object is not subscriptable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'NoneType' object is not subscriptable",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'NoneType' object is not iterable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'NoneType' object is not iterable",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "AttributeError: 'NoneType' object has no attribute 'append'",
+    "error_normalized": [
+      {
+        "error_type": "AttributeError",
+        "message": "AttributeError: 'NoneType' object has no attribute 'append'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "AttributeError: 'NoneType' object has no attribute 'split'",
+    "error_normalized": [
+      {
+        "error_type": "AttributeError",
+        "message": "AttributeError: 'NoneType' object has no attribute 'split'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "AttributeError: 'NoneType' object has no attribute 'join'",
+    "error_normalized": [
+      {
+        "error_type": "AttributeError",
+        "message": "AttributeError: 'NoneType' object has no attribute 'join'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'NoneType' object is not callable",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'NoneType' object is not callable",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: object of type 'NoneType' has no len()",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: object of type 'NoneType' has no len()",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: '>' not supported between instances of 'NoneType' and 'int'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: '>' not supported between instances of 'NoneType' and 'int'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: '<' not supported between instances of 'int' and 'NoneType'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: '<' not supported between instances of 'int' and 'NoneType'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: 'NoneType' object cannot be interpreted as an integer",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: 'NoneType' object cannot be interpreted as an integer",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_missing_return_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'",
+    "error_normalized": [
+      {
+        "error_type": "TypeError",
+        "message": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'",
+        "line": null
+      }
+    ],
+    "concept_label": "missing_return",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_0",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: duplicate argument 'x' in function definition",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: duplicate argument 'x' in function definition",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_1",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: keyword argument repeated",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: keyword argument repeated",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_2",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxWarning: 'if' condition is always True",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxWarning",
+        "message": "SyntaxWarning: 'if' condition is always True",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_3",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxWarning: 'if' condition is always False",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxWarning",
+        "message": "SyntaxWarning: 'if' condition is always False",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_4",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "AssertionError",
+    "error_normalized": [
+      {
+        "error_type": "Error",
+        "message": "AssertionError",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_5",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "Exception: Unreachable code executed",
+    "error_normalized": [
+      {
+        "error_type": "Exception",
+        "message": "Exception: Unreachable code executed",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_6",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "ValueError: Redundant Condition",
+    "error_normalized": [
+      {
+        "error_type": "ValueError",
+        "message": "ValueError: Redundant Condition",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_7",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: positional argument follows keyword argument",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: positional argument follows keyword argument",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_8",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: non-default argument follows default argument",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: non-default argument follows default argument",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_9",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxError: name 'var' is parameter and global",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxError",
+        "message": "SyntaxError: name 'var' is parameter and global",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_10",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "SyntaxWarning: assertion is always true, perhaps remove parentheses?",
+    "error_normalized": [
+      {
+        "error_type": "SyntaxWarning",
+        "message": "SyntaxWarning: assertion is always true, perhaps remove parentheses?",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_11",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "Warning: redundant conditional expression",
+    "error_normalized": [
+      {
+        "error_type": "Warning",
+        "message": "Warning: redundant conditional expression",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  },
+  {
+    "id": "aug_redundant_condition_12",
+    "source": "augmented",
+    "language": "python",
+    "code": "",
+    "error_raw": "ValueError: condition already checked",
+    "error_normalized": [
+      {
+        "error_type": "ValueError",
+        "message": "ValueError: condition already checked",
+        "line": null
+      }
+    ],
+    "concept_label": "redundant_condition",
+    "confidence": "high"
+  }
+]

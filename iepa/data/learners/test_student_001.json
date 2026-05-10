@@ -1,0 +1,45 @@
+{
+  "learner_id": "test_student_001",
+  "history": [
+    {
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-05-02T17:05:36.911825"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.46668920542351866,
+      "timestamp": "2026-05-02T17:05:36.968678"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.568739911733751,
+      "timestamp": "2026-05-02T17:05:36.984140"
+    },
+    {
+      "concept": "missing_return",
+      "confidence": 0.4821648849158674,
+      "timestamp": "2026-05-02T17:05:36.991718"
+    },
+    {
+      "concept": "indentation_logic",
+      "confidence": 0.5725995022912428,
+      "timestamp": "2026-05-02T17:05:37.006603"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-05-10T10:20:53.484043"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-05-10T10:20:55.713402"
+    }
+  ],
+  "mastery": {
+    "off_by_one": 0.0,
+    "missing_return": 0.4,
+    "indentation_logic": 0.4
+  }
+}

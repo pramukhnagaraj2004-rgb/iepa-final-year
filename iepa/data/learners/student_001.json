@@ -1,0 +1,13 @@
+{
+  "learner_id": "student_001",
+  "history": [
+    {
+      "concept": "type_mismatch",
+      "confidence": 0.4198802769226415,
+      "timestamp": "2026-05-10T11:18:53.487666"
+    }
+  ],
+  "mastery": {
+    "type_mismatch": 0.4
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "dbscan": {
+    "n_clusters": 1,
+    "noise_points": 2,
+    "silhouette": null
+  },
+  "kmeans": {
+    "n_clusters": 10,
+    "silhouette": 0.22784045338630676
+  },
+  "total_samples": 147
+}
