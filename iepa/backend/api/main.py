@@ -6,12 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from contextlib import asynccontextmanager
 
-from iepa.backend.api.models import AnalyzeRequest, ClusterRequest, APIResponse
+from iepa.backend.api.models import AnalyzeRequest, AnalyzeManualRequest, ClusterRequest, APIResponse
 from iepa.backend.engine.pipeline import analyze
 from iepa.backend.ml.clustering.error_clusterer import ErrorClusterer
+from iepa.backend.sandbox.executor import CodeExecutor
 
-# Initialize singleton for clusterer
+# Initialize singletons for clusterer and sandbox code executor
 clusterer = ErrorClusterer()
+executor = CodeExecutor()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,7 +59,48 @@ async def health_check():
 
 @app.post("/analyze", response_model=APIResponse)
 async def analyze_endpoint(req: AnalyzeRequest):
-    if not req.error_raw.strip():
+    """
+    Executes student code inside an isolated Docker sandbox container.
+    Captures runtime/syntax errors automatically and passes them to the ML pipeline.
+    """
+    if not req.code or not req.code.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "error": "code is required"}
+        )
+
+    try:
+        # 1. Execute code in isolated Docker sandbox
+        exec_res = executor.execute(req.code, language=req.language or "python")
+        
+        # 2. If an error was detected or timeout occurred, run through ML analysis pipeline
+        if exec_res.get("error_raw"):
+            result = analyze(req.learner_id, exec_res["error_raw"])
+            result["execution"] = exec_res
+            return APIResponse(success=True, data=result)
+        
+        # 3. If code ran successfully with no errors
+        return APIResponse(
+            success=True,
+            data={
+                "message": "Code ran successfully, no errors detected",
+                "stdout": exec_res.get("stdout", ""),
+                "execution": exec_res
+            }
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
+@app.post("/analyze/manual", response_model=APIResponse)
+async def analyze_manual_endpoint(req: AnalyzeManualRequest):
+    """
+    Accepts raw error strings directly without code execution.
+    Maintained for backward compatibility and automated testing.
+    """
+    if not req.error_raw or not req.error_raw.strip():
         return JSONResponse(
             status_code=400,
             content={"success": False, "error": "error_raw is required"}

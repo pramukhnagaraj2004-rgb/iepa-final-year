@@ -8,4 +8,3 @@ frontend/build/
 iepa/frontend/node_modules/
 iepa/data/learners/
 .env
-data/DeepFix/

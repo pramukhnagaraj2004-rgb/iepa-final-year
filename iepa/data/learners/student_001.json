@@ -2,12 +2,22 @@
   "learner_id": "student_001",
   "history": [
     {
-      "concept": "type_mismatch",
-      "confidence": 0.4198802769226415,
-      "timestamp": "2026-05-10T11:18:53.487666"
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-06-12T13:51:58.649983"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-06-12T13:53:52.019098"
+    },
+    {
+      "concept": "off_by_one",
+      "confidence": 0.6188827984565323,
+      "timestamp": "2026-06-12T13:54:04.591300"
     }
   ],
   "mastery": {
-    "type_mismatch": 0.4
+    "off_by_one": 0.15000000000000005
   }
 }

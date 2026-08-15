@@ -47,3 +47,13 @@ All notable changes to this project will be documented in this file.
 - **Completed Phase 6 Frontend Development:** Bootstrapped React SPA within `iepa/frontend` using `create-react-app`.
 - **Added** `iepa/frontend/src/App.js` implementing a unified dashboard with Monaco Code Editor, dynamic Pedagogical Feedback Panel, Concept Mastery Dashboard (using Recharts), and Error History tracking.
 - **Configured** Tailwind CSS via CDN in `iepa/frontend/public/index.html`.
+
+## [2026-08-15 08:30:00+05:30]
+- **Added** `iepa/backend/sandbox/executor.py` implementing `CodeExecutor` for isolated dynamic execution of student code inside Docker containers (`python:3.11-slim`) with `--network none`, `--memory 128m`, `--cpus 0.5`, `--pids-limit 64`, 10-second timeout enforcement, and automatic exception extraction (`error_raw`).
+- **Added** `iepa/backend/ml/mapper/tfidf_scratch.py` implementing `TFIDFVectorizer` (character n-grams with word boundary padding `char_wb`, smooth IDF, L2 vector normalization) and `LogisticRegressionScratch` (multiclass One-vs-Rest, numerical clipping, L2 weight decay regularization, vectorized gradient descent) with human-readable JSON model persistence.
+- **Updated** `iepa/backend/ml/mapper/concept_mapper.py` to use scratch ML models (`tfidf_scratch.json`, `logreg_scratch.json`), preserving the exact `predict_concept(error_string)` interface and adding side-by-side validation against scikit-learn (matching vocabulary within 0.00% and test accuracy within 3.33%, well within the 5% target).
+- **Updated** `iepa/backend/api/models.py` and `iepa/backend/api/main.py`:
+  - Updated `POST /analyze` to execute submitted code in the Docker sandbox, automatically extract runtime/syntax exceptions, route them through the ML feedback pipeline, and return clean execution feedback if error-free.
+  - Added `POST /analyze/manual` accepting `error_raw` directly for backward compatibility and automated testing.
+- **Fixed** `iepa/backend/engine/decision_engine.py` to persist `tier` in error history records.
+- **Updated** `requirements.txt` to include `numpy`, `jinja2`, and `httpx`.

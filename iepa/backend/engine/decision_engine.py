@@ -9,22 +9,15 @@ class DecisionEngine:
         self.history = []
         self.mastery = {}
 
-    def record_error(self, concept: str, confidence: float):
-        # Append to history
-        self.history.append({
-            "concept": concept,
-            "confidence": confidence,
-            "timestamp": datetime.now().isoformat()
-        })
+    def record_error(self, concept: str, confidence: float, tier: str = None):
+        # Count occurrences for this concept (including current attempt)
+        concept_count = sum(1 for h in self.history if h["concept"] == concept) + 1
         
         # Update mastery score
         if concept not in self.mastery:
             # First time seeing this error concept
             self.mastery[concept] = 0.4
         else:
-            # Count how many times this concept has appeared in history
-            concept_count = sum(1 for h in self.history if h["concept"] == concept)
-            
             if concept_count == 2:
                 self.mastery[concept] -= 0.1
             elif concept_count >= 3:
@@ -32,6 +25,16 @@ class DecisionEngine:
                 
         # Clamp between 0.0 and 1.0
         self.mastery[concept] = max(0.0, min(1.0, self.mastery[concept]))
+        
+        computed_tier = tier or self.get_feedback_tier(concept)
+
+        # Append to history
+        self.history.append({
+            "concept": concept,
+            "confidence": confidence,
+            "tier": computed_tier,
+            "timestamp": datetime.now().isoformat()
+        })
 
     def get_feedback_tier(self, concept: str) -> str:
         score = self.mastery.get(concept, 0.5) # Default to 0.5 if somehow missing

@@ -3,42 +3,32 @@
   "history": [
     {
       "concept": "off_by_one",
-      "confidence": 0.6188827984565323,
-      "timestamp": "2026-05-02T17:05:36.911825"
+      "confidence": 0.5187150239944458,
+      "timestamp": "2026-08-15T08:43:31.823529"
     },
     {
       "concept": "off_by_one",
-      "confidence": 0.46668920542351866,
-      "timestamp": "2026-05-02T17:05:36.968678"
+      "confidence": 0.4223528206348419,
+      "timestamp": "2026-08-15T08:43:31.861482"
     },
     {
       "concept": "off_by_one",
-      "confidence": 0.568739911733751,
-      "timestamp": "2026-05-02T17:05:36.984140"
+      "confidence": 0.48892512917518616,
+      "timestamp": "2026-08-15T08:43:31.868252"
     },
     {
       "concept": "missing_return",
-      "confidence": 0.4821648849158674,
-      "timestamp": "2026-05-02T17:05:36.991718"
+      "confidence": 0.40964168310165405,
+      "timestamp": "2026-08-15T08:43:31.873753"
     },
     {
       "concept": "indentation_logic",
-      "confidence": 0.5725995022912428,
-      "timestamp": "2026-05-02T17:05:37.006603"
-    },
-    {
-      "concept": "off_by_one",
-      "confidence": 0.6188827984565323,
-      "timestamp": "2026-05-10T10:20:53.484043"
-    },
-    {
-      "concept": "off_by_one",
-      "confidence": 0.6188827984565323,
-      "timestamp": "2026-05-10T10:20:55.713402"
+      "confidence": 0.5005643367767334,
+      "timestamp": "2026-08-15T08:43:31.881602"
     }
   ],
   "mastery": {
-    "off_by_one": 0.0,
+    "off_by_one": 0.15000000000000005,
     "missing_return": 0.4,
     "indentation_logic": 0.4
   }
