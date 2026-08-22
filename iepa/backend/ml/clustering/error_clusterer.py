@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from pathlib import Path
 from collections import Counter
@@ -6,14 +7,21 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 from sentence_transformers import SentenceTransformer
-from sklearn.cluster import DBSCAN, KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.cluster import DBSCAN, KMeans as SklearnKMeans
+from sklearn.metrics import silhouette_score as sklearn_silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 import umap
 
 # Setup Paths
 CURRENT_DIR = Path(os.path.abspath(os.path.dirname(__file__)))
 PROJECT_ROOT = CURRENT_DIR.parent.parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+try:
+    from iepa.backend.ml.clustering.kmeans_scratch import KMeansScratch
+except ImportError:
+    from kmeans_scratch import KMeansScratch
+
 DATA_PATH = PROJECT_ROOT / "data" / "labeled_dataset.json"
 if not DATA_PATH.exists():
     DATA_PATH = PROJECT_ROOT / "iepa" / "data" / "labeled_dataset.json"
@@ -22,20 +30,27 @@ EVAL_DIR = PROJECT_ROOT / "iepa" / "evaluation"
 EMBEDDINGS_PATH = CURRENT_DIR / "embeddings.npy"
 METRICS_PATH = EVAL_DIR / "cluster_metrics.json"
 PLOT_PATH = EVAL_DIR / "cluster_plot.png"
+KMEANS_MODEL_PATH = CURRENT_DIR / "kmeans_scratch.json"
 
 class ErrorClusterer:
     def __init__(self):
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self._model = None
         self.dataset = []
         self.corpus = []
         self.concepts = []
         self.embeddings = None
         
         self.dbscan = DBSCAN(eps=0.5, min_samples=2, metric='cosine')
-        self.kmeans = KMeans(n_clusters=10, random_state=42)
+        self.kmeans = KMeansScratch(n_clusters=10, max_iter=300, random_state=42, n_init=10)
         
         self.dbscan_labels_ = None
         self.kmeans_labels_ = None
+
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = SentenceTransformer('all-MiniLM-L6-v2')
+        return self._model
 
     def load_data(self):
         print(f"[*] Loading dataset from {DATA_PATH}...")
@@ -51,7 +66,6 @@ class ErrorClusterer:
         if EMBEDDINGS_PATH.exists():
             print("    -> Found existing embeddings.npy, loading...")
             self.embeddings = np.load(EMBEDDINGS_PATH)
-            # Make sure it matches our current dataset size
             if self.embeddings.shape[0] != len(self.corpus):
                 print("    -> Dataset size changed, re-encoding...")
                 self.embeddings = self.model.encode(self.corpus, show_progress_bar=True)
@@ -71,37 +85,58 @@ class ErrorClusterer:
         print(f"    -> DBSCAN found {dbscan_n_clusters} clusters and {noise_points} noise points.")
         print("    -> DBSCAN distribution:", Counter(self.dbscan_labels_))
         
-        print("\n[*] Running KMeans clustering (k=10)...")
+        print("\n[*] Running Scratch KMeans clustering (k=10)...")
         self.kmeans_labels_ = self.kmeans.fit_predict(self.embeddings)
-        print("    -> KMeans distribution:", Counter(self.kmeans_labels_))
+        print("    -> Scratch KMeans distribution:", Counter(self.kmeans_labels_))
+        
+        # Save scratch model
+        self.kmeans.save(str(KMEANS_MODEL_PATH))
+        print(f"[+] Saved KMeans scratch model to {KMEANS_MODEL_PATH}")
         
         return dbscan_n_clusters, noise_points
 
     def evaluate(self, dbscan_n_clusters, noise_points):
-        print("\n[*] Evaluating clusters...")
-        # Calculate KMeans Silhouette
-        kmeans_sil = silhouette_score(self.embeddings, self.kmeans_labels_, metric='cosine')
+        print("\n[*] Evaluating clusters (Side-by-Side: Scratch vs Sklearn)...")
         
-        # Calculate DBSCAN Silhouette
+        # Scratch Silhouette Score
+        scratch_sil = KMeansScratch.silhouette_score(self.embeddings, self.kmeans_labels_)
+        
+        # Sklearn Baseline for Comparison
+        sk_kmeans = SklearnKMeans(n_clusters=10, random_state=42, n_init=10)
+        sk_labels = sk_kmeans.fit_predict(self.embeddings)
+        sk_sil = sklearn_silhouette_score(self.embeddings, sk_labels, metric='cosine')
+        
+        # DBSCAN Silhouette
         dbscan_sil = None
         if noise_points / len(self.embeddings) <= 0.5 and dbscan_n_clusters > 1:
-            dbscan_sil = silhouette_score(self.embeddings, self.dbscan_labels_, metric='cosine')
+            dbscan_sil = float(sklearn_silhouette_score(self.embeddings, self.dbscan_labels_, metric='cosine'))
             
-        print(f"    -> KMeans Silhouette Score: {kmeans_sil:.4f}")
-        if dbscan_sil is not None:
-            print(f"    -> DBSCAN Silhouette Score: {dbscan_sil:.4f}")
-        else:
-            print("    -> DBSCAN Silhouette Score: Skipped (>50% noise or insufficient clusters)")
+        sil_diff = abs(scratch_sil - sk_sil)
+        
+        print("===========================================================")
+        print("  KMEANS CLUSTERING VALIDATION (Scratch vs Sklearn)")
+        print("===========================================================")
+        print(f"Sklearn KMeans Cosine Silhouette:  {sk_sil:.4f}")
+        print(f"Scratch KMeans Cosine Silhouette:  {scratch_sil:.4f}")
+        print(f"Silhouette Difference:             {sil_diff:.4f} (Target: <= 0.02)")
+        print("-----------------------------------------------------------")
 
         metrics = {
+            "scratch_kmeans": {
+                "n_clusters": 10,
+                "silhouette": float(scratch_sil),
+                "iterations": self.kmeans.n_iter_,
+                "inertia": self.kmeans.inertia_
+            },
+            "sklearn_kmeans": {
+                "n_clusters": 10,
+                "silhouette": float(sk_sil)
+            },
+            "silhouette_diff": float(sil_diff),
             "dbscan": {
                 "n_clusters": dbscan_n_clusters,
                 "noise_points": noise_points,
                 "silhouette": dbscan_sil
-            },
-            "kmeans": {
-                "n_clusters": 10,
-                "silhouette": float(kmeans_sil)
             },
             "total_samples": len(self.embeddings)
         }
@@ -121,47 +156,48 @@ class ErrorClusterer:
         scatter = plt.scatter(embedding_2d[:, 0], embedding_2d[:, 1], 
                               c=self.kmeans_labels_, cmap='tab10', alpha=0.7, s=50)
         
-        # Add tiny labels
         for i, concept in enumerate(self.concepts):
             plt.annotate(concept, (embedding_2d[i, 0], embedding_2d[i, 1]), 
                          fontsize=6, alpha=0.6)
             
-        plt.title('UMAP Projection of Error String Embeddings (Colored by KMeans)')
-        plt.colorbar(scatter, label='KMeans Cluster ID')
+        plt.title('UMAP Projection of Error String Embeddings (Colored by Scratch KMeans)')
+        plt.colorbar(scatter, label='Scratch KMeans Cluster ID')
         plt.tight_layout()
         
         plt.savefig(PLOT_PATH, dpi=150)
+        plt.close()
         print(f"[+] Saved UMAP plot to {PLOT_PATH}")
 
     def cluster_namer(self):
-        print("\n--- KMeans Cluster to Concept Mapping Summary ---")
+        print("\n--- Scratch KMeans Cluster to Concept Mapping Summary ---")
         cluster_map = {}
         for i in range(10):
-            # Get all indices belonging to this cluster
             indices = np.where(self.kmeans_labels_ == i)[0]
-            # Get concepts for these indices
             cluster_concepts = [self.concepts[idx] for idx in indices]
-            # Count them
             counts = Counter(cluster_concepts)
-            # Top 3
             top3 = counts.most_common(3)
             cluster_map[i] = top3
-            
             top3_str = ", ".join([f"{c} x{cnt}" for c, cnt in top3])
             print(f"Cluster {i}: [{top3_str}]")
 
     def get_cluster(self, error_string: str) -> dict:
         """
-        Embeds input error string, assigns to nearest KMeans cluster centroid,
+        Embeds input error string, assigns to nearest Scratch KMeans cluster centroid,
         and returns nearest actual errors from dataset.
         """
-        if self.embeddings is None or self.kmeans_labels_ is None:
-            raise RuntimeError("Clusterer has not been fitted or loaded.")
+        if self.embeddings is None or self.kmeans.centroids_ is None:
+            if KMEANS_MODEL_PATH.exists():
+                self.kmeans.load(str(KMEANS_MODEL_PATH))
+            if EMBEDDINGS_PATH.exists():
+                self.embeddings = np.load(EMBEDDINGS_PATH)
+            if not self.corpus and DATA_PATH.exists():
+                self.load_data()
             
         emb = self.model.encode([error_string])
         
-        # Find nearest centroid
-        distances = cosine_similarity(emb, self.kmeans.cluster_centers_)
+        # Find nearest centroid using cosine similarity
+        norm_emb = emb / np.linalg.norm(emb)
+        distances = norm_emb @ self.kmeans.centroids_.T
         cluster_id = int(np.argmax(distances[0]))
         
         # Find top 3 nearest actual errors in corpus

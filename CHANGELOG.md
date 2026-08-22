@@ -57,3 +57,29 @@ All notable changes to this project will be documented in this file.
   - Added `POST /analyze/manual` accepting `error_raw` directly for backward compatibility and automated testing.
 - **Fixed** `iepa/backend/engine/decision_engine.py` to persist `tier` in error history records.
 - **Updated** `requirements.txt` to include `numpy`, `jinja2`, and `httpx`.
+
+## [2026-08-22 11:40:00+05:30]
+- **Added** `iepa/backend/ml/clustering/kmeans_scratch.py` implementing `KMeansScratch` with K-Means++ $D^2$ distance initialization, spherical cosine distance assignment, explicit centroid L2 normalization ($\|c\|_2 = 1$), multi-restart (`n_init=10`) inertia optimization, custom Cosine Silhouette Score calculation, and JSON model persistence (`kmeans_scratch.json`).
+- **Updated** `iepa/backend/ml/clustering/error_clusterer.py` to replace scikit-learn with `KMeansScratch`. Side-by-side evaluation verified cosine silhouette score within 0.0070 of scikit-learn (0.2319 vs 0.2388, well within the $\le 0.02$ requirement).
+- **Added** `iepa/backend/db/mongo.py` using `motor` for asynchronous MongoDB Atlas operations across `users`, `learner_state`, and `analyses` collections with seamless local JSON fallback handlers.
+- **Added** `iepa/backend/auth/oauth.py` integrating Authlib Google OAuth 2.0 and `python-jose` for signed JWT creation (`create_access_token`), token verification (`decode_access_token`), and FastAPI authentication dependencies (`get_current_user`, `get_optional_current_user`).
+- **Updated** `iepa/backend/api/main.py`:
+  - Added `GET /auth/google` (initiating OAuth with explicit HTTP 302 redirect).
+  - Added `GET /auth/google/callback` (exchanging code, creating user in MongoDB Atlas, signing JWT, redirecting to frontend).
+  - Added `GET /auth/me` (returning user profile and remaining monthly quota).
+  - Enforced Freemium tier gating on `POST /analyze` (returns HTTP 429 when 20 monthly analyses are exceeded on free tier).
+  - Configured `SessionMiddleware` for OAuth CSRF state handling.
+- **Updated** `iepa/backend/sandbox/executor.py` with automatic daemon connection failure detection and direct subprocess execution fallback for cloud environments (Render) and local environments where Docker daemon is unreachable.
+- **Updated** Frontend React SPA (`iepa/frontend`):
+  - Added `src/context/AuthContext.jsx` with memoized callbacks (`useCallback`), ref guards (`useRef`), and token hydration to eliminate infinite `/auth/me` render loops.
+  - Added `src/pages/Landing.jsx` with Google OAuth login CTA and platform architecture summary.
+  - Added `src/pages/AuthCallback.jsx` with single-fire token extraction and protected route redirection.
+  - Configured `react-router-dom` in `src/App.js` with `ProtectedRoute`, dynamic user avatar, remaining analyses quota display, and 429 quota limit banner handling.
+- **Added** Cloud Deployment Configurations:
+  - `render.yaml` at project root for Render Python 3.11 web service deployment.
+  - `iepa/frontend/.env.production` configuring `REACT_APP_API_URL`.
+  - `iepa/frontend/vercel.json` configuring SPA routing rewrites.
+- **Added** Automated Test Suites:
+  - `scripts/test_week2_pipeline.py` (KMeans scratch vs sklearn silhouette validation, MongoDB CRUD, JWT, Freemium gating).
+  - `scripts/test_week2_final.py` (end-to-end live pipeline verification).
+- **Updated** `requirements.txt` with `authlib`, `python-jose[cryptography]`, `motor`, `pymongo`, `dnspython`, `python-dotenv`, `itsdangerous`.
