@@ -83,3 +83,12 @@ All notable changes to this project will be documented in this file.
   - `scripts/test_week2_pipeline.py` (KMeans scratch vs sklearn silhouette validation, MongoDB CRUD, JWT, Freemium gating).
   - `scripts/test_week2_final.py` (end-to-end live pipeline verification).
 - **Updated** `requirements.txt` with `authlib`, `python-jose[cryptography]`, `motor`, `pymongo`, `dnspython`, `python-dotenv`, `itsdangerous`.
+
+## [2026-08-23 (Week 3)]
+- **Added** `iepa/backend/curriculum/exercise_bank.py` — hardcoded exercise bank covering all 10 curriculum concepts, each with 2 theory MCQs, 3 coding challenges, and 3 vetted external resources.
+- **Added** `iepa/backend/curriculum/scoring_engine.py` — `ScoringEngine` class handling per-user concept progress (Mongo + local JSON fallback via new `db/mongo.py` functions), normal-attempt vs retest exercise selection, answer scoring, concept unlock chaining, and mastery decrement on failed attempts (reusing the existing `DecisionEngine`).
+- **Updated** `iepa/backend/db/mongo.py` — added `CURRICULUM_DIR`, `get_concept_progress()`, and `save_concept_progress()` following the existing Mongo + local-JSON-fallback pattern.
+- **Updated** `iepa/backend/api/models.py` — added `SubmitAnswerRequest` and `CheckCodeRequest` schemas.
+- **Updated** `iepa/backend/api/main.py` — added 5 new curriculum endpoints: `GET /curriculum/concepts`, `GET /curriculum/progress`, `GET /curriculum/exercise/{concept}`, `POST /curriculum/submit/{concept}`, `POST /curriculum/check-code/{concept}/{question_id}`.
+- **Rebuilt frontend UI/UX**: new dark theme design system (`#0A0A0F`/`#6C63FF`, Inter font), restyled `Landing.jsx`, new `Dashboard.jsx` with curriculum sidebar, `Sidebar.jsx`, `CodeSandbox.jsx`, `FeedbackPanel.jsx`, `ExercisePanel.jsx`, `ConceptResult.jsx`.
+- **Added** `scripts/test_week3_curriculum.py` covering exercise bank completeness, scoring pass/fail/retest logic, unlock chaining, and live sandbox execution via `check_coding_answer`.

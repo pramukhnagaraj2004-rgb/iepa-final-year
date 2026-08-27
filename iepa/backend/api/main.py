@@ -3,6 +3,7 @@ import sys
 import json
 from pathlib import Path
 from typing import Optional, Dict, Any
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
@@ -28,9 +29,12 @@ try:
         AnalyzeRequest,
         AnalyzeManualRequest,
         ClusterRequest,
-        APIResponse
+        APIResponse,
+        SubmitAnswerRequest,
+        CheckCodeRequest
     )
     from iepa.backend.engine.pipeline import analyze
+    from iepa.backend.engine.feedback_generator import FeedbackGenerator
     from iepa.backend.ml.clustering.error_clusterer import ErrorClusterer
     from iepa.backend.sandbox.executor import CodeExecutor
     from iepa.backend.auth.oauth import (
@@ -49,6 +53,8 @@ try:
         log_analysis,
         increment_analyses
     )
+    from iepa.backend.curriculum.scoring_engine import ScoringEngine, CONCEPT_ORDER
+    from iepa.backend.curriculum.exercise_bank import EXERCISE_BANK
     print("[main.py] All backend submodules imported successfully.")
 except Exception as err:
     import traceback
@@ -59,6 +65,7 @@ except Exception as err:
 # Initialize singletons for clusterer and sandbox code executor
 clusterer = ErrorClusterer()
 executor = CodeExecutor()
+_feedback_gen = FeedbackGenerator()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -251,7 +258,7 @@ async def analyze_endpoint(
                         "concept": result["concept"],
                         "confidence": result["confidence"],
                         "tier": result["tier"],
-                        "timestamp": result.get("timestamp", "")
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     await save_learner_state(user_id, result["mastery_report"], history)
 
@@ -406,3 +413,147 @@ async def get_concepts():
         {"label": "logical_error", "description": "The code runs without crashing but produces incorrect results due to flawed logic."}
     ]
     return APIResponse(success=True, data=concepts)
+
+# ═══════════════════════════════════════════════════════════
+# CURRICULUM ENDPOINTS (Week 3)
+# ═══════════════════════════════════════════════════════════
+
+CONCEPT_DISPLAY_NAMES = {
+    "indentation_logic": "Indentation & Block Structure",
+    "uninitialized_variable": "Uninitialized Variables",
+    "type_mismatch": "Type Mismatches",
+    "logical_operator_confusion": "Logical Operator Confusion",
+    "infinite_loop": "Infinite Loops",
+    "off_by_one": "Off-by-One Errors",
+    "array_out_of_bounds": "Array/List Out of Bounds",
+    "missing_return": "Missing Return Statements",
+    "wrong_return_type": "Wrong Return Type",
+    "redundant_condition": "Redundant Conditions",
+}
+
+CONCEPT_DESCRIPTIONS = {
+    "indentation_logic": "How Python uses indentation to define code blocks.",
+    "uninitialized_variable": "Using a variable before it has ever been assigned.",
+    "type_mismatch": "Mixing incompatible types like str and int.",
+    "logical_operator_confusion": "Misusing and/or/not or = vs ==.",
+    "infinite_loop": "Loops whose exit condition never becomes true.",
+    "off_by_one": "Loop/index bounds that are one too many or too few.",
+    "array_out_of_bounds": "Accessing a list index that doesn't exist.",
+    "missing_return": "Functions that fall through without returning a value.",
+    "wrong_return_type": "Functions that return inconsistent or unexpected types.",
+    "redundant_condition": "Unnecessarily complex or duplicated conditionals.",
+}
+
+
+def _get_user_id(current_user: Dict[str, Any]) -> str:
+    return current_user.get("google_id") or current_user.get("email") or "user_default"
+
+
+@app.get("/curriculum/concepts", response_model=APIResponse, tags=["Curriculum"])
+async def get_curriculum_concepts():
+    """
+    No auth required. Returns ordered list of all 10 concepts.
+    """
+    concepts = []
+    for i, name in enumerate(CONCEPT_ORDER):
+        concepts.append({
+            "name": name,
+            "display_name": CONCEPT_DISPLAY_NAMES.get(name, name),
+            "level": i + 1,
+            "description": CONCEPT_DESCRIPTIONS.get(name, ""),
+            "prerequisites": [CONCEPT_ORDER[i - 1]] if i > 0 else [],
+        })
+    return APIResponse(success=True, data=concepts)
+
+
+@app.get("/curriculum/progress", response_model=APIResponse, tags=["Curriculum"])
+async def get_curriculum_progress(current_user: Dict[str, Any] = Depends(get_current_user)):
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+    progress = await engine.get_progress()
+
+    completed_count = sum(1 for c in progress.values() if c["status"] == "passed")
+    current_concept = next(
+        (name for name in CONCEPT_ORDER if progress[name]["status"] in ("unlocked", "attempted")),
+        None,
+    )
+
+    return APIResponse(success=True, data={
+        "concepts": progress,
+        "current_concept": current_concept,
+        "completed_count": completed_count,
+    })
+
+
+@app.get("/curriculum/exercise/{concept}", response_model=APIResponse, tags=["Curriculum"])
+async def get_curriculum_exercise(concept: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+    if concept not in EXERCISE_BANK:
+        return JSONResponse(status_code=404, content={"success": False, "error": f"Unknown concept: {concept}"})
+
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+
+    try:
+        exercise_set = await engine.get_exercise_set(concept)
+    except PermissionError as e:
+        return JSONResponse(status_code=403, content={"success": False, "error": str(e)})
+
+    theory_safe = {k: v for k, v in exercise_set["theory"].items() if k not in ("correct", "explanation")}
+    coding_safe = [
+        {k: v for k, v in q.items() if k not in ("solution_check", "explanation")}
+        for q in exercise_set["coding"]
+    ]
+
+    return APIResponse(success=True, data={"theory": theory_safe, "coding": coding_safe})
+
+
+@app.post("/curriculum/submit/{concept}", response_model=APIResponse, tags=["Curriculum"])
+async def submit_curriculum_answers(
+    concept: str,
+    req: SubmitAnswerRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    if concept not in EXERCISE_BANK:
+        return JSONResponse(status_code=404, content={"success": False, "error": f"Unknown concept: {concept}"})
+
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+
+    try:
+        result = await engine.submit_answers(concept, req.theory_answer, req.coding_results)
+    except PermissionError as e:
+        return JSONResponse(status_code=403, content={"success": False, "error": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+    return APIResponse(success=True, data=result)
+
+
+@app.post("/curriculum/check-code/{concept}/{question_id}", response_model=APIResponse, tags=["Curriculum"])
+async def check_curriculum_code(
+    concept: str,
+    question_id: str,
+    req: CheckCodeRequest,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+):
+    if concept not in EXERCISE_BANK:
+        return JSONResponse(status_code=404, content={"success": False, "error": f"Unknown concept: {concept}"})
+
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+
+    try:
+        result = engine.check_coding_answer(concept, question_id, req.code)
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+    return APIResponse(success=True, data=result)
+
+
+@app.post("/curriculum/reveal-explanation/{concept}", response_model=APIResponse, tags=["Curriculum"])
+async def reveal_explanation(concept: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+    user_id = _get_user_id(current_user)
+    result = _feedback_gen.generate(concept, "explain", "")
+    engine = ScoringEngine(user_id)
+    engine.apply_explanation_penalty(concept)
+    return APIResponse(success=True, data={"explanation": result["feedback"]})

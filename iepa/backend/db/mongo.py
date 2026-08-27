@@ -23,9 +23,10 @@ DATA_DIR = PROJECT_ROOT / "iepa" / "data"
 USERS_DIR = DATA_DIR / "users"
 LEARNERS_DIR = DATA_DIR / "learners"
 ANALYSES_DIR = DATA_DIR / "analyses"
+CURRICULUM_DIR = DATA_DIR / "curriculum_progress"
 
 # Ensure local fallback directories exist
-for folder in [USERS_DIR, LEARNERS_DIR, ANALYSES_DIR]:
+for folder in [USERS_DIR, LEARNERS_DIR, ANALYSES_DIR, CURRICULUM_DIR]:
     folder.mkdir(parents=True, exist_ok=True)
 
 _client: Optional[AsyncIOMotorClient] = None
@@ -254,6 +255,56 @@ async def save_learner_state(user_id: str, mastery: Dict[str, float], history: L
             json.dump(state_payload, f, indent=2)
     except Exception as e:
         print(f"[!] Local learner_state write error: {e}")
+
+async def get_concept_progress(user_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieves curriculum concept_progress document by user_id.
+    Falls back to local file if Mongo is unavailable. Returns None
+    if nothing found (caller is responsible for initializing defaults).
+    """
+    try:
+        db = get_db()
+        if db is not None:
+            doc = await db.concept_progress.find_one({"user_id": user_id})
+            if doc:
+                doc.pop("_id", None)
+                return doc
+    except Exception as e:
+        print(f"[!] Mongo get_concept_progress notice: {e}")
+
+    safe_id = "".join([c if c.isalnum() or c in ("-", "_", "@", ".") else "_" for c in user_id])
+    file_path = CURRICULUM_DIR / f"{safe_id}.json"
+    if file_path.exists():
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[!] Local concept_progress read error: {e}")
+    return None
+
+
+async def save_concept_progress(user_id: str, progress_doc: Dict[str, Any]) -> None:
+    """
+    Saves or updates curriculum concept_progress in MongoDB Atlas and local disk.
+    """
+    try:
+        db = get_db()
+        if db is not None:
+            await db.concept_progress.update_one(
+                {"user_id": user_id},
+                {"$set": progress_doc},
+                upsert=True,
+            )
+    except Exception as e:
+        print(f"[!] Mongo save_concept_progress notice: {e}")
+
+    safe_id = "".join([c if c.isalnum() or c in ("-", "_", "@", ".") else "_" for c in user_id])
+    file_path = CURRICULUM_DIR / f"{safe_id}.json"
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(progress_doc, f, indent=2)
+    except Exception as e:
+        print(f"[!] Local concept_progress write error: {e}")
 
 async def log_analysis(user_id: str, analysis_result: Dict[str, Any]) -> None:
     """
