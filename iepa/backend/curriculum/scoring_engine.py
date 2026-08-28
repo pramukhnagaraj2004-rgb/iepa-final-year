@@ -53,6 +53,7 @@ class ScoringEngine:
                 "last_score": 0,
                 "questions_used": [],
                 "passed_at": None,
+                "last_result": None,
             }
         return {"user_id": self.user_id, "concept_progress": concept_progress}
 
@@ -100,6 +101,30 @@ class ScoringEngine:
                 coding = [bank["coding"][0], bank["coding"][2]]
 
         return {"theory": theory, "coding": coding}
+    
+    async def get_gate_pool(self, concept: str) -> list:
+        if concept not in EXERCISE_BANK:
+            raise ValueError(f"Unknown concept: {concept}")
+        progress = await self._load_progress()
+        state = progress["concept_progress"][concept]
+        if state["status"] == "locked":
+            raise PermissionError(f"Concept '{concept}' is locked")
+        bank = EXERCISE_BANK[concept]
+        return [
+            {k: v for k, v in q.items() if k not in ("solution_check", "explanation")}
+            for q in bank["coding"]
+        ]
+    
+    async def get_review(self, concept: str) -> dict:
+        progress = await self._load_progress()
+        state = progress["concept_progress"][concept]
+        if state["status"] != "passed":
+            raise PermissionError(f"Concept '{concept}' has not been passed yet")
+        return state.get("last_result") or {
+            "score": state.get("last_score", 0),
+            "resources": EXERCISE_BANK[concept]["resources"],
+            "wrong_answers": [],
+        }
 
     async def submit_answers(self, concept: str, theory_answer: str,
                               coding_results: list) -> dict:
@@ -142,6 +167,7 @@ class ScoringEngine:
             state["status"] = "passed"
             state["last_score"] = score
             state["passed_at"] = datetime.now(timezone.utc).isoformat()
+            state["last_result"] = {"score": score, "resources": bank["resources"], "wrong_answers": wrong_answers}
 
             current_index = CONCEPT_ORDER.index(concept)
             next_concept = None

@@ -258,6 +258,7 @@ async def analyze_endpoint(
                         "concept": result["concept"],
                         "confidence": result["confidence"],
                         "tier": result["tier"],
+                        "error_raw": exec_res.get("error_raw", ""),
                         "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     await save_learner_state(user_id, result["mastery_report"], history)
@@ -557,3 +558,29 @@ async def reveal_explanation(concept: str, current_user: Dict[str, Any] = Depend
     engine = ScoringEngine(user_id)
     engine.apply_explanation_penalty(concept)
     return APIResponse(success=True, data={"explanation": result["feedback"]})
+    
+
+@app.get("/curriculum/review/{concept}", response_model=APIResponse, tags=["Curriculum"])
+async def get_curriculum_review(concept: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+    if concept not in EXERCISE_BANK:
+        return JSONResponse(status_code=404, content={"success": False, "error": f"Unknown concept: {concept}"})
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+    try:
+        review = await engine.get_review(concept)
+    except PermissionError as e:
+        return JSONResponse(status_code=403, content={"success": False, "error": str(e)})
+    return APIResponse(success=True, data={"passed": True, **review})
+
+
+@app.get("/curriculum/gate/{concept}", response_model=APIResponse, tags=["Curriculum"])
+async def get_curriculum_gate(concept: str, current_user: Dict[str, Any] = Depends(get_current_user)):
+    if concept not in EXERCISE_BANK:
+        return JSONResponse(status_code=404, content={"success": False, "error": f"Unknown concept: {concept}"})
+    user_id = _get_user_id(current_user)
+    engine = ScoringEngine(user_id)
+    try:
+        pool = await engine.get_gate_pool(concept)
+    except PermissionError as e:
+        return JSONResponse(status_code=403, content={"success": False, "error": str(e)})
+    return APIResponse(success=True, data={"pool": pool})

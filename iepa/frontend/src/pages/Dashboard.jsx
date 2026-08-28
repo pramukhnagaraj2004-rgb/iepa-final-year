@@ -26,6 +26,14 @@ export default function Dashboard() {
     const [exerciseState, setExerciseState] = useState(null);
     const [submitResult, setSubmitResult] = useState(null);
 
+    // --- Gate (concept practice) state ---
+    const [gateActive, setGateActive] = useState(false);
+    const [gateConcept, setGateConcept] = useState(null);
+    const [gatePool, setGatePool] = useState([]);
+    const [gateQuestionId, setGateQuestionId] = useState(null);
+    const [verifyingGate, setVerifyingGate] = useState(false);
+    const [gateResult, setGateResult] = useState(null);
+
     const fetchHistory = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE}/learner/${learnerId}/history`);
@@ -69,9 +77,93 @@ export default function Dashboard() {
         }
     };
 
-    const handleSelectConcept = (concept) => {
+    const loadReview = async (concept) => {
+        setExerciseState(null);
+        try {
+            const res = await axios.get(`${API_BASE}/curriculum/review/${concept}`);
+            if (res.data.success) setSubmitResult(res.data.data);
+        } catch (e) {
+            setSubmitResult(null);
+        }
+    };
+
+    const pickRandom = (pool, excludeId) => {
+        const options = pool.filter((q) => q.id !== excludeId);
+        const list = options.length > 0 ? options : pool;
+        return list[Math.floor(Math.random() * list.length)];
+    };
+
+    const enterPracticeMode = async (concept) => {
         setActiveConcept(concept);
-        loadExercise(concept);
+        setFeedbackData(null);
+        setExecutionData(null);
+        setExerciseState(null);
+        setSubmitResult(null);
+        setGateResult(null);
+        setGateActive(true);
+        setGateConcept(concept);
+
+        try {
+            const res = await axios.get(`${API_BASE}/curriculum/gate/${concept}`);
+            if (res.data.success) {
+                const pool = res.data.data.pool;
+                setGatePool(pool);
+                const chosen = pickRandom(pool, null);
+                setGateQuestionId(chosen.id);
+                setCode(chosen.buggy_code);
+            }
+        } catch (e) {
+            setGateActive(false);
+            setGateConcept(null);
+            setApiError('Could not load practice exercise for this concept.');
+        }
+    };
+
+    const handleTryDifferent = () => {
+        if (gatePool.length === 0) return;
+        const chosen = pickRandom(gatePool, gateQuestionId);
+        setGateQuestionId(chosen.id);
+        setCode(chosen.buggy_code);
+        setGateResult(null);
+    };
+
+    const handleVerifyGate = async () => {
+        setVerifyingGate(true);
+        setGateResult(null);
+        try {
+            const res = await axios.post(
+                `${API_BASE}/curriculum/check-code/${gateConcept}/${gateQuestionId}`,
+                { code }
+            );
+            const result = res.data.data;
+            setGateResult(result);
+            if (result.correct) {
+                setGateActive(false);
+                await loadExercise(gateConcept);
+            }
+        } catch (e) {
+            setGateResult({ correct: false, error_raw: e.message });
+        } finally {
+            setVerifyingGate(false);
+        }
+    };
+
+    const handleExitGate = () => {
+        setGateActive(false);
+        setGateConcept(null);
+        setGateResult(null);
+        setExerciseState(null);
+    };
+
+    const handleSelectConcept = (concept) => {
+        if (progress[concept]?.status === 'passed') {
+            setActiveConcept(concept);
+            setGateActive(false);
+            setGateConcept(null);
+            loadReview(concept);
+        } else {
+            enterPracticeMode(concept);
+        }
     };
 
     const handleAnalyze = async () => {
@@ -89,15 +181,8 @@ export default function Dashboard() {
                 if (payload.concept) {
                     setFeedbackData(payload);
                     setExecutionData(payload.execution || null);
-                    if (progress[payload.concept] && progress[payload.concept].status !== 'locked') {
-                        setActiveConcept(payload.concept);
-                        loadExercise(payload.concept);
-                    }
                 } else {
                     setExecutionData(payload.execution || { stdout: payload.stdout, success: true, error_raw: '' });
-                    if (activeConcept && !exerciseState) {
-                        loadExercise(activeConcept);
-                    }
                 }
                 fetchHistory();
                 const token = localStorage.getItem('iepa_token');
@@ -147,8 +232,7 @@ export default function Dashboard() {
         setSubmitResult(null);
         setExerciseState(null);
         if (nextConcept) {
-            setActiveConcept(nextConcept);
-            loadExercise(nextConcept);
+            enterPracticeMode(nextConcept);
         }
     };
 
@@ -156,6 +240,8 @@ export default function Dashboard() {
         setSubmitResult(null);
         loadExercise(activeConcept);
     };
+
+    const gateConceptLabel = concepts.find((c) => c.name === gateConcept)?.display_name || gateConcept;
 
     return (
         <div className="min-h-screen bg-[#0A0A0F] text-[#F1F5F9] flex">
@@ -189,7 +275,21 @@ export default function Dashboard() {
 
                 <main className="flex-1 overflow-y-auto p-6 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <CodeSandbox code={code} setCode={setCode} onAnalyze={handleAnalyze} loading={loading} feedbackData={feedbackData} />
+                        <CodeSandbox
+                            code={code}
+                            setCode={setCode}
+                            onAnalyze={handleAnalyze}
+                            loading={loading}
+                            feedbackData={feedbackData}
+                            executionData={executionData}
+                            gateActive={gateActive}
+                            gateConceptLabel={gateConceptLabel}
+                            verifyingGate={verifyingGate}
+                            gateResult={gateResult}
+                            onVerifyGate={handleVerifyGate}
+                            onTryDifferent={handleTryDifferent}
+                            onExitGate={handleExitGate}
+                        />
                         <FeedbackPanel
                             feedbackData={feedbackData}
                             executionData={executionData}
@@ -199,6 +299,8 @@ export default function Dashboard() {
                             submitResult={submitResult}
                             onContinueNext={() => handleContinueNext(submitResult?.next_concept)}
                             onRetry={handleRetry}
+                            onPracticeConcept={enterPracticeMode}
+                            progress={progress}
                         />
                     </div>
 
@@ -215,6 +317,7 @@ export default function Dashboard() {
                                         <tr className="text-[#94A3B8] uppercase tracking-wider border-b border-[#2A2A3E]">
                                             <th className="p-3">Attempt</th>
                                             <th className="p-3">Concept</th>
+                                            <th className="p-3">Error Captured</th>
                                             <th className="p-3">Tier</th>
                                             <th className="p-3">Time</th>
                                         </tr>
@@ -224,6 +327,7 @@ export default function Dashboard() {
                                             <tr key={idx} className="border-b border-[#2A2A3E]">
                                                 <td className="p-3 font-mono text-[#94A3B8]">#{historyData.length - idx}</td>
                                                 <td className="p-3 font-semibold">{item.concept.replace(/_/g, ' ')}</td>
+                                                <td className="p-3 font-mono text-[#EF4444] max-w-xs truncate">{item.error_raw || '—'}</td>
                                                 <td className="p-3 uppercase font-bold">{item.tier}</td>
                                                 <td className="p-3 text-[#94A3B8]">{new Date(item.timestamp).toLocaleString()}</td>
                                             </tr>

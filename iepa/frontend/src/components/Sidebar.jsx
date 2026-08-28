@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Lock, CheckCircle2, Circle, CircleDot } from 'lucide-react';
 
 const STATUS_STYLE = {
@@ -9,24 +9,30 @@ const STATUS_STYLE = {
 };
 
 export default function Sidebar({
-    concepts,        // ordered list from GET /curriculum/concepts
-    progress,        // map from GET /curriculum/progress -> concepts
+    concepts,
+    progress,
     activeConcept,
     onSelectConcept,
     user,
     analysesRemaining,
     tier,
 }) {
+    const [avatarError, setAvatarError] = useState(false);
+
     return (
         <aside className="w-[240px] shrink-0 bg-[#12121A] border-r border-[#2A2A3E] flex flex-col h-full">
-            {/* User info */}
             <div className="p-4 border-b border-[#2A2A3E]">
                 <div className="flex items-center gap-2.5">
-                    {user?.picture ? (
-                        <img src={user.picture} alt="avatar" className="w-9 h-9 rounded-full" />
+                    {user?.picture && !avatarError ? (
+                        <img
+                            src={user.picture}
+                            alt="avatar"
+                            onError={() => setAvatarError(true)}
+                            className="w-9 h-9 rounded-full shrink-0"
+                        />
                     ) : (
-                        <div className="w-9 h-9 rounded-full bg-[#6C63FF] flex items-center justify-center text-sm font-bold">
-                            {user?.name ? user.name[0] : 'U'}
+                        <div className="w-9 h-9 rounded-full bg-[#6C63FF] flex items-center justify-center text-sm font-bold shrink-0">
+                            {user?.name ? user.name[0].toUpperCase() : 'U'}
                         </div>
                     )}
                     <div className="min-w-0">
@@ -43,7 +49,6 @@ export default function Sidebar({
                 )}
             </div>
 
-            {/* Curriculum list */}
             <div className="flex-1 overflow-y-auto p-3">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] px-1 mb-2">
                     Python Curriculum

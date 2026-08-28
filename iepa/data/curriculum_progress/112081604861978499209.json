@@ -13,21 +13,79 @@
       "passed_at": "2026-08-24T15:21:12.172879+00:00"
     },
     "uninitialized_variable": {
-      "status": "unlocked",
-      "attempts": 0,
-      "last_score": 0,
-      "questions_used": [],
-      "passed_at": null
+      "status": "passed",
+      "attempts": 1,
+      "last_score": 2,
+      "questions_used": [
+        "uninitialized_variable_t2",
+        "uninitialized_variable_c1",
+        "uninitialized_variable_c2"
+      ],
+      "passed_at": "2026-08-27T04:52:34.906238+00:00",
+      "last_result": {
+        "score": 2,
+        "resources": [
+          {
+            "title": "Python Docs \u2014 Naming and binding",
+            "url": "https://docs.python.org/3/reference/executionmodel.html#naming-and-binding",
+            "description": "Official explanation of when a name becomes bound in Python's execution model."
+          },
+          {
+            "title": "W3Schools \u2014 Python Variables",
+            "url": "https://www.w3schools.com/python/python_variables.asp",
+            "description": "Basics of variable creation and assignment in Python."
+          },
+          {
+            "title": "GeeksforGeeks \u2014 NameError in Python",
+            "url": "https://www.geeksforgeeks.org/python/nameerror-name-is-not-defined-in-python/",
+            "description": "Common causes of NameError, including uninitialized variables."
+          }
+        ],
+        "wrong_answers": [
+          {
+            "question_id": "uninitialized_variable_t2",
+            "question": "A variable is assigned only inside an if branch that doesn't execute. What happens when the code later tries to use it?",
+            "your_answer": "B",
+            "correct_answer": "C",
+            "explanation": "A variable only exists after its assignment statement actually executes. If that assignment is inside a branch that is skipped, the name is never bound, so referencing it afterward raises a NameError \u2014 Python doesn't pre-scan branches to reserve names with defaults."
+          }
+        ]
+      }
     },
     "type_mismatch": {
-      "status": "locked",
+      "status": "passed",
       "attempts": 0,
-      "last_score": 0,
-      "questions_used": [],
-      "passed_at": null
+      "last_score": 3,
+      "questions_used": [
+        "type_mismatch_t1",
+        "type_mismatch_c1",
+        "type_mismatch_c2"
+      ],
+      "passed_at": "2026-08-28T05:14:45.521867+00:00",
+      "last_result": {
+        "score": 3,
+        "resources": [
+          {
+            "title": "Python Docs \u2014 Built-in Types",
+            "url": "https://docs.python.org/3/library/stdtypes.html",
+            "description": "Reference for how Python's core types behave and interact."
+          },
+          {
+            "title": "W3Schools \u2014 Python Type Casting",
+            "url": "https://www.w3schools.com/python/python_casting.asp",
+            "description": "How to convert between str, int, and float explicitly."
+          },
+          {
+            "title": "GeeksforGeeks \u2014 TypeError in Python",
+            "url": "https://www.geeksforgeeks.org/python/type-conversion-in-python/",
+            "description": "Covers implicit vs explicit type conversion and common mismatch errors."
+          }
+        ],
+        "wrong_answers": []
+      }
     },
     "logical_operator_confusion": {
-      "status": "locked",
+      "status": "unlocked",
       "attempts": 0,
       "last_score": 0,
       "questions_used": [],

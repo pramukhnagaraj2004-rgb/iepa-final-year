@@ -13,6 +13,8 @@ export default function FeedbackPanel({
     submitResult,
     onContinueNext,
     onRetry,
+    onPracticeConcept,
+    progress,
 }) {
     const { API_BASE } = useAuth();
     const [explanation, setExplanation] = useState(null);
@@ -75,10 +77,19 @@ export default function FeedbackPanel({
                                 {explanation}
                             </div>
                         )}
-                        {feedbackData.tier === 'exercise' && feedbackData.follow_up_exercise && (
+                        {feedbackData.tier === 'exercise' && feedbackData.follow_up_exercise && feedbackData.follow_up_exercise !== feedbackData.feedback && (
                             <div className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl p-4 text-sm text-[#F1F5F9]">
                                 {feedbackData.follow_up_exercise}
                             </div>
+                        )}
+
+                        {feedbackData.concept && !exerciseState && progress?.[feedbackData.concept]?.status !== 'locked' && (
+                            <button
+                                onClick={() => onPracticeConcept(feedbackData.concept)}
+                                className="text-xs font-semibold text-[#6C63FF] underline block"
+                            >
+                                🎯 Practice {feedbackData.concept.replace(/_/g, ' ')} exercises
+                            </button>
                         )}
                     </div>
                 )}

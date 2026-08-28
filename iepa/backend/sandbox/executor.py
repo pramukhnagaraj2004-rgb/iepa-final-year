@@ -8,6 +8,12 @@ from typing import Dict, Any
 
 IS_RENDER = bool(os.environ.get("RENDER", False))
 
+# Fed to any code that calls input() so it doesn't hang forever waiting
+# on a stdin that will never actually be typed into. 30 lines of "1" is
+# enough for typical intro-level scripts with a handful of input() calls.
+DEFAULT_STDIN = "\n".join(["1"] * 30) + "\n"
+
+
 class CodeExecutor:
     def __init__(
         self,
@@ -24,19 +30,14 @@ class CodeExecutor:
         self.docker_image = docker_image
 
     def _extract_error_raw(self, stderr: str) -> str:
-        """
-        Extracts the primary Python exception string from stderr.
-        Finds the last non-empty line that contains 'Error:'.
-        Falls back to the last non-empty line if no explicit 'Error:' line exists.
-        """
         lines = [line.strip() for line in stderr.splitlines() if line.strip()]
         if not lines:
             return ""
-        
+
         for line in reversed(lines):
             if "Error:" in line:
                 return line
-        
+
         return lines[-1]
 
     def _execute_subprocess(self, script_path: str, language: str) -> Dict[str, Any]:
@@ -46,6 +47,7 @@ class CodeExecutor:
         try:
             proc = subprocess.run(
                 [sys.executable, script_path],
+                input=DEFAULT_STDIN,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout
@@ -109,15 +111,13 @@ class CodeExecutor:
             with open(script_path, "w", encoding="utf-8") as f:
                 f.write(code)
 
-            # If on Render, use direct subprocess
             if IS_RENDER:
                 return self._execute_subprocess(script_path, language)
 
-            # Normalize path for Docker volume mounting
             norm_mount_path = os.path.abspath(temp_dir).replace("\\", "/")
 
             docker_cmd = [
-                "docker", "run", "--rm",
+                "docker", "run", "--rm", "-i",
                 "--network", "none",
                 "--memory", self.memory,
                 f"--cpus={self.cpus}",
@@ -129,6 +129,7 @@ class CodeExecutor:
 
             proc = subprocess.run(
                 docker_cmd,
+                input=DEFAULT_STDIN,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout
@@ -138,9 +139,7 @@ class CodeExecutor:
             stderr = proc.stderr
             exit_code = proc.returncode
 
-            # Check if Docker daemon failed
             if "docker: error during connect" in stderr or "open //./pipe/dockerDesktopLinuxEngine" in stderr or exit_code == 125:
-                # Docker daemon not ready -> fallback to direct subprocess
                 return self._execute_subprocess(script_path, language)
 
             if exit_code == 0 and not stderr:
@@ -178,27 +177,29 @@ class CodeExecutor:
                 "language": language
             }
         except Exception as e:
-            # Fallback to subprocess if Docker failed to connect
             return self._execute_subprocess(script_path, language)
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 if __name__ == "__main__":
     executor = CodeExecutor(timeout=5)
     print("=== Testing CodeExecutor with resilient daemon fallback ===")
     print(f"IS_RENDER mode: {IS_RENDER}")
 
-    # Test 1: IndexError
     code_index_error = "numbers = [10, 20, 30]\nprint(numbers[10])"
     res1 = executor.execute(code_index_error)
     print("Test 1 - IndexError caught:", "IndexError" in res1["error_raw"])
-    print("Error raw:", res1["error_raw"])
     assert "IndexError" in res1["error_raw"]
 
-    # Test 2: Clean code
     code_clean = "print('Subprocess / Sandbox test passed!')"
     res2 = executor.execute(code_clean)
     print("Test 2 - Clean execution:", res2["success"])
     assert res2["success"] is True
+
+    code_with_input = "x = input('enter: ')\nprint('got:', x)"
+    res3 = executor.execute(code_with_input)
+    print("Test 3 - input() no longer hangs:", res3["success"], res3["stdout"])
+    assert res3["timed_out"] is False
 
     print("\n[+] CodeExecutor verified!")
