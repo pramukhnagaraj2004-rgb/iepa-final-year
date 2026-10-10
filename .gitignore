@@ -1,4 +1,4 @@
-﻿venv/
+venv/
 __pycache__/
 *.pyc
 *.pkl
@@ -7,4 +7,7 @@ node_modules/
 frontend/build/
 iepa/frontend/node_modules/
 iepa/data/learners/
+iepa/data/users/
+iepa/data/analyses/
+iepa/data/curriculum_progress/
 .env

@@ -1,8 +1,9 @@
 import os
+import re
 import sys
 import json
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -29,6 +30,7 @@ if not DATA_PATH.exists():
 
 EVAL_DIR = PROJECT_ROOT / "iepa" / "evaluation"
 METRICS_PATH = EVAL_DIR / "mapper_metrics.json"
+HELDOUT_METRICS_PATH = EVAL_DIR / "mapper_heldout_metrics.json"
 
 # Model paths (JSON for scratch models, pkl for backward compatibility)
 SCRATCH_TFIDF_PATH = CURRENT_DIR / "tfidf_scratch.json"
@@ -36,26 +38,29 @@ SCRATCH_LOGREG_PATH = CURRENT_DIR / "logreg_scratch.json"
 LEGACY_VECTORIZER_PATH = CURRENT_DIR / "tfidf_vectorizer.pkl"
 LEGACY_CLASSIFIER_PATH = CURRENT_DIR / "logistic_classifier.pkl"
 
+# File paths inside tracebacks can contain the answer (e.g. ...\off_by_one_3.py),
+# which lets the model read the label instead of learning the error pattern.
+# They are replaced with <FILE> for both training and prediction.
+_PATH_RE = re.compile(r'[A-Za-z]:\\[^\s"]*?\.py|/[^\s"]*?\.py')
+
+
+def scrub_paths(text: str) -> str:
+    return _PATH_RE.sub("<FILE>", text)
+
+
 class ConceptMapper:
     def __init__(self):
         self.vectorizer = TFIDFVectorizer(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
         self.classifier = LogisticRegressionScratch(learning_rate=1.0, max_iter=2000, C=1.0, random_state=42)
         self.classes_ = []
 
-    def load_data(self, json_path: Path) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Reads labeled_dataset.json and extracts input feature strings and concept targets.
-        """
-        if not json_path.exists():
-            raise FileNotFoundError(f"Dataset not found at {json_path}")
-            
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            
-        X, y = [], []
+    @staticmethod
+    def _parse(data: list) -> Tuple[List[str], List[str], List[str]]:
+        """Turns raw dataset rows into feature strings, labels, and split tags."""
+        X, y, split = [], [], []
         for item in data:
-            error_raw = item.get("error_raw", "")
-            
+            error_raw = scrub_paths(item.get("error_raw", ""))
+
             # Extract error_normalized types safely
             normalized_list = item.get("error_normalized", [])
             error_types = []
@@ -64,15 +69,27 @@ class ConceptMapper:
                     error_types.append(ev["error_type"])
                 elif "severity" in ev:
                     error_types.append(ev["severity"])
-                    
+
             error_type_str = " ".join(error_types)
-            
-            # Input feature string: error_raw + error_normalized.type
-            feature_string = f"{error_raw} {error_type_str}".strip()
-            
-            X.append(feature_string)
+
+            # Input feature string: error_raw (paths scrubbed) + error_normalized.type
+            X.append(f"{error_raw} {error_type_str}".strip())
             y.append(item.get("concept_label", "unknown"))
-            
+            # Older samples have no 'split' field -> they count as training data
+            split.append(item.get("split", "train"))
+        return X, y, split
+
+    def load_data(self, json_path: Path) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Reads labeled_dataset.json and extracts input feature strings and concept targets.
+        """
+        if not json_path.exists():
+            raise FileNotFoundError(f"Dataset not found at {json_path}")
+
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        X, y, _ = self._parse(data)
         return np.array(X), np.array(y)
 
     def train_and_evaluate(self, X: np.ndarray, y: np.ndarray):
@@ -83,16 +100,16 @@ class ConceptMapper:
         print("[*] Vectorizing features using Scratch TF-IDF...")
         X_vec_scratch = self.vectorizer.fit_transform(X.tolist())
         self.classes_ = self.vectorizer.feature_names_
-        
+
         print("[*] Splitting dataset (80/20 train/test split, stratified)...")
         X_train_sc, X_test_sc, y_train, y_test = train_test_split(
             X_vec_scratch, y, test_size=0.2, stratify=y, random_state=42
         )
-            
+
         print("[*] Training Scratch Logistic Regression (OvR with L2 Regularization)...")
         self.classifier.fit(X_train_sc, y_train)
         self.classes_ = self.classifier.classes_
-        
+
         # Train Sklearn baseline on same split for side-by-side validation
         print("[*] Training Sklearn equivalents for side-by-side comparison...")
         sk_vec = SklearnTfidf(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
@@ -102,22 +119,22 @@ class ConceptMapper:
         )
         sk_clf = SklearnLogReg(max_iter=1000, C=1.0, random_state=42)
         sk_clf.fit(X_train_sk, y_train)
-        
+
         # 5-fold CV for Sklearn baseline
         sk_cv_scores = cross_val_score(sk_clf, X_vec_sk, y, cv=5, scoring="f1_macro")
         sk_mean_cv_f1 = float(sk_cv_scores.mean())
-        
+
         # Predictions
         y_pred_scratch = self.classifier.predict(X_test_sc)
         y_pred_sklearn = sk_clf.predict(X_test_sk)
-        
+
         acc_scratch = accuracy_score(y_test, y_pred_scratch)
         acc_sklearn = accuracy_score(y_test, y_pred_sklearn)
         acc_diff_pct = abs(acc_sklearn - acc_scratch) * 100.0
-        
+
         report_scratch = classification_report(y_test, y_pred_scratch, output_dict=True, zero_division=0)
         report_sklearn = classification_report(y_test, y_pred_sklearn, output_dict=True, zero_division=0)
-        
+
         print("\n===========================================================")
         print("  SIDE-BY-SIDE MODEL VALIDATION (Scratch vs Sklearn)")
         print("===========================================================")
@@ -127,7 +144,7 @@ class ConceptMapper:
         print("-----------------------------------------------------------")
         print("\n--- Scratch Classification Report ---")
         print(classification_report(y_test, y_pred_scratch, zero_division=0))
-        
+
         # Save validation metrics
         EVAL_DIR.mkdir(parents=True, exist_ok=True)
         metrics = {
@@ -141,6 +158,65 @@ class ConceptMapper:
         with open(METRICS_PATH, "w", encoding="utf-8") as f:
             json.dump(metrics, f, indent=2)
         print(f"[+] Validation metrics saved to {METRICS_PATH}")
+
+    def evaluate_heldout(self, json_path: Path):
+        """
+        Honest test: train only on samples with split != 'heldout', test only on
+        samples with split == 'heldout' (bug patterns the model has never seen).
+        Fresh models are used, so the saved production model is not affected.
+        """
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        X, y, split = self._parse(data)
+
+        tr = [i for i, s in enumerate(split) if s != "heldout"]
+        te = [i for i, s in enumerate(split) if s == "heldout"]
+        if not te:
+            print("[!] No samples with split='heldout' found; skipping held-out evaluation.")
+            return
+
+        X_tr, y_tr = [X[i] for i in tr], np.array([y[i] for i in tr])
+        X_te, y_te = [X[i] for i in te], np.array([y[i] for i in te])
+
+        # Scratch models (vectorizer fitted on training data only)
+        vec = TFIDFVectorizer(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
+        A = vec.fit_transform(X_tr)
+        B = vec.transform(X_te)
+        clf = LogisticRegressionScratch(learning_rate=1.0, max_iter=2000, C=1.0, random_state=42)
+        clf.fit(A, y_tr)
+        pred_scratch = clf.predict(B)
+
+        # Sklearn equivalents
+        sk_vec = SklearnTfidf(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
+        A_sk = sk_vec.fit_transform(X_tr).toarray().astype(np.float32)
+        B_sk = sk_vec.transform(X_te).toarray().astype(np.float32)
+        sk_clf = SklearnLogReg(max_iter=1000, C=1.0, random_state=42).fit(A_sk, y_tr)
+        pred_sk = sk_clf.predict(B_sk)
+
+        acc_scratch = accuracy_score(y_te, pred_scratch)
+        acc_sklearn = accuracy_score(y_te, pred_sk)
+
+        print("\n===========================================================")
+        print("  HELD-OUT EVALUATION (unseen bug patterns, paths scrubbed)")
+        print("===========================================================")
+        print(f"Train samples: {len(tr)} | Held-out test samples: {len(te)}")
+        print(f"Sklearn Held-out Accuracy:  {acc_sklearn * 100:.2f}%")
+        print(f"Scratch Held-out Accuracy:  {acc_scratch * 100:.2f}%")
+        print("\n--- Scratch Held-out Classification Report ---")
+        print(classification_report(y_te, pred_scratch, zero_division=0))
+
+        EVAL_DIR.mkdir(parents=True, exist_ok=True)
+        out = {
+            "train_samples": len(tr),
+            "heldout_samples": len(te),
+            "scratch_heldout_accuracy": acc_scratch,
+            "sklearn_heldout_accuracy": acc_sklearn,
+            "scratch_classification_report": classification_report(y_te, pred_scratch, output_dict=True, zero_division=0),
+            "sklearn_classification_report": classification_report(y_te, pred_sk, output_dict=True, zero_division=0),
+        }
+        with open(HELDOUT_METRICS_PATH, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2)
+        print(f"[+] Held-out metrics saved to {HELDOUT_METRICS_PATH}")
 
     def save_model(self):
         """
@@ -175,7 +251,10 @@ class ConceptMapper:
         if not hasattr(self.vectorizer, "vocabulary_") or not self.vectorizer.vocabulary_:
             if not self.load_model():
                 raise RuntimeError("Model is not trained or loaded yet.")
-                
+
+        # Same path scrubbing as training, so real executor tracebacks match
+        error_string = scrub_paths(error_string)
+
         # Vectorize input
         if isinstance(self.vectorizer, TFIDFVectorizer):
             x_vec = self.vectorizer.transform([error_string])
@@ -186,16 +265,16 @@ class ConceptMapper:
             x_vec = self.vectorizer.transform([error_string])
             probas = self.classifier.predict_proba(x_vec)[0]
             classes = list(self.classifier.classes_)
-        
+
         # Top 1 prediction
         best_idx = int(np.argmax(probas))
         concept = classes[best_idx]
         confidence = float(probas[best_idx])
-        
+
         # Top 3 predictions
         top3_indices = np.argsort(probas)[::-1][:3]
         top3 = [{"concept": classes[int(i)], "confidence": float(probas[int(i)])} for i in top3_indices]
-        
+
         return {
             "concept": concept,
             "confidence": confidence,
@@ -204,14 +283,15 @@ class ConceptMapper:
 
 if __name__ == "__main__":
     mapper = ConceptMapper()
-    
+
     print("--- Phase 3: Concept Mapper Training & Side-by-Side Validation ---")
     X, y = mapper.load_data(DATA_PATH)
     print(f"[*] Loaded {len(X)} samples from {DATA_PATH}")
-    
+
     mapper.train_and_evaluate(X, y)
     mapper.save_model()
-    
+    mapper.evaluate_heldout(DATA_PATH)
+
     print("\n--- Testing predict_concept() on Unseen Errors ---")
     test_errors = [
         "TypeError: unsupported operand type(s) for +: 'int' and 'str'",
@@ -220,7 +300,7 @@ if __name__ == "__main__":
         "RecursionError: maximum recursion depth exceeded while calling a Python object",
         "IndentationError: unexpected indent"
     ]
-    
+
     for idx, err in enumerate(test_errors, 1):
         result = mapper.predict_concept(err)
         print(f"Test {idx}: {err}")
