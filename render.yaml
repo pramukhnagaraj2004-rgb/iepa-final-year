@@ -2,8 +2,10 @@ services:
   - type: web
     name: iepa-backend
     runtime: python
-    buildCommand: pip install -r requirements.txt
+    plan: free
+    buildCommand: pip install -r requirements-render.txt
     startCommand: uvicorn iepa.backend.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: MONGO_URI
         sync: false

@@ -70,14 +70,17 @@ _feedback_gen = FeedbackGenerator()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("[*] Starting up IEPA API server...")
-    print("[*] Initializing ErrorClusterer with KMeansScratch...")
-    try:
-        clusterer.load_data()
-        clusterer.embed_corpus()
-        clusterer.cluster()
-        print("[+] ErrorClusterer initialized successfully.")
-    except Exception as e:
-        print(f"[!] Failed to initialize ErrorClusterer: {e}")
+    if os.environ.get("RENDER"):
+        print("[*] RENDER detected: skipping ErrorClusterer startup (clustering runs in offline analysis mode).")
+    else:
+        print("[*] Initializing ErrorClusterer with KMeansScratch...")
+        try:
+            clusterer.load_data()
+            clusterer.embed_corpus()
+            clusterer.cluster()
+            print("[+] ErrorClusterer initialized successfully.")
+        except Exception as e:
+            print(f"[!] Failed to initialize ErrorClusterer: {e}")
     
     yield
     print("[*] Shutting down IEPA API server...")
@@ -390,6 +393,11 @@ async def get_history(learner_id: str):
 
 @app.post("/cluster", response_model=APIResponse, tags=["Clustering"])
 async def cluster_endpoint(req: ClusterRequest):
+    if os.environ.get("RENDER"):
+        return JSONResponse(
+            status_code=503,
+            content={"success": False, "error": "Clustering runs in offline analysis mode in this deployment."}
+        )
     try:
         result = clusterer.get_cluster(req.error_raw)
         return APIResponse(success=True, data=result)
