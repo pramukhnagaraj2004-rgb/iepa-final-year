@@ -48,6 +48,30 @@ def scrub_paths(text: str) -> str:
     return _PATH_RE.sub("<FILE>", text)
 
 
+def extract_error_line(error_text: str) -> str:
+    """
+    Same rule the live sandbox executor uses: the last line containing 'Error:',
+    otherwise the last non-empty line. Training and prediction both use it, so the
+    model is trained on exactly the kind of text it receives at runtime.
+    """
+    lines = [l.strip() for l in error_text.splitlines() if l.strip()]
+    if not lines:
+        return ""
+    for line in reversed(lines):
+        if "Error:" in line:
+            return line
+    return lines[-1]
+
+
+def build_features(error_text: str, code: str = None) -> str:
+    """Feature string = scrubbed error line (+ the student's code, when available)."""
+    line = extract_error_line(scrub_paths(error_text or ""))
+    code = (code or "").strip()
+    if code:
+        return f"{line} [CODE] {code}"
+    return line
+
+
 class ConceptMapper:
     def __init__(self):
         self.vectorizer = TFIDFVectorizer(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
@@ -59,21 +83,7 @@ class ConceptMapper:
         """Turns raw dataset rows into feature strings, labels, and split tags."""
         X, y, split = [], [], []
         for item in data:
-            error_raw = scrub_paths(item.get("error_raw", ""))
-
-            # Extract error_normalized types safely
-            normalized_list = item.get("error_normalized", [])
-            error_types = []
-            for ev in normalized_list:
-                if "error_type" in ev:
-                    error_types.append(ev["error_type"])
-                elif "severity" in ev:
-                    error_types.append(ev["severity"])
-
-            error_type_str = " ".join(error_types)
-
-            # Input feature string: error_raw (paths scrubbed) + error_normalized.type
-            X.append(f"{error_raw} {error_type_str}".strip())
+            X.append(build_features(item.get("error_raw", ""), item.get("code", "")))
             y.append(item.get("concept_label", "unknown"))
             # Older samples have no 'split' field -> they count as training data
             split.append(item.get("split", "train"))
@@ -218,6 +228,35 @@ class ConceptMapper:
             json.dump(out, f, indent=2)
         print(f"[+] Held-out metrics saved to {HELDOUT_METRICS_PATH}")
 
+    def evaluate_grouped_cv(self, json_path: Path, folds: int = 5):
+        """
+        5-fold CV where samples that share a template (or identical code) always stay
+        in the same fold, so the score is not inflated by near-duplicate programs.
+        """
+        import hashlib
+        from sklearn.model_selection import GroupKFold
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        X, y, _ = self._parse(data)
+        groups = [
+            item.get("template_id")
+            or hashlib.md5((item.get("code") or item.get("error_raw", "")).encode()).hexdigest()
+            for item in data
+        ]
+        vec = SklearnTfidf(analyzer="char_wb", ngram_range=(2, 4), max_features=5000)
+        M = vec.fit_transform(X).toarray().astype(np.float32)
+        clf = SklearnLogReg(max_iter=1000, C=1.0, random_state=42)
+        acc = cross_val_score(clf, M, np.array(y), cv=GroupKFold(folds), groups=groups, scoring="accuracy")
+        f1 = cross_val_score(clf, M, np.array(y), cv=GroupKFold(folds), groups=groups, scoring="f1_macro")
+        print("\n===========================================================")
+        print("  GROUPED 5-FOLD CV (sklearn; template twins kept together)")
+        print("===========================================================")
+        print(f"Accuracy: {acc.mean() * 100:.2f}% (+/- {acc.std() * 100:.2f})   Macro F1: {f1.mean():.2f}")
+        EVAL_DIR.mkdir(parents=True, exist_ok=True)
+        with open(EVAL_DIR / "mapper_grouped_cv.json", "w", encoding="utf-8") as f:
+            json.dump({"folds": folds, "accuracy_mean": float(acc.mean()), "accuracy_std": float(acc.std()),
+                       "macro_f1_mean": float(f1.mean())}, f, indent=2)
+
     def save_model(self):
         """
         Saves scratch models as JSON files.
@@ -243,7 +282,7 @@ class ConceptMapper:
             return True
         return False
 
-    def predict_concept(self, error_string: str) -> Dict[str, Any]:
+    def predict_concept(self, error_string: str, code: str = None) -> Dict[str, Any]:
         """
         Predicts concept gap category for a given error string.
         """
@@ -252,8 +291,8 @@ class ConceptMapper:
             if not self.load_model():
                 raise RuntimeError("Model is not trained or loaded yet.")
 
-        # Same path scrubbing as training, so real executor tracebacks match
-        error_string = scrub_paths(error_string)
+        # Identical feature construction to training (path scrubbing, error line, optional code)
+        error_string = build_features(error_string, code)
 
         # Vectorize input
         if isinstance(self.vectorizer, TFIDFVectorizer):
@@ -291,6 +330,7 @@ if __name__ == "__main__":
     mapper.train_and_evaluate(X, y)
     mapper.save_model()
     mapper.evaluate_heldout(DATA_PATH)
+    mapper.evaluate_grouped_cv(DATA_PATH)
 
     print("\n--- Testing predict_concept() on Unseen Errors ---")
     test_errors = [
