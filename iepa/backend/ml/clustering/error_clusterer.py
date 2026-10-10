@@ -1,16 +1,22 @@
 import os
+import re
 import sys
 import json
 from pathlib import Path
 from collections import Counter
 
 import numpy as np
-import matplotlib.pyplot as plt
-from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN, KMeans as SklearnKMeans
 from sklearn.metrics import silhouette_score as sklearn_silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
-import umap
+
+# File paths in tracebacks can leak the label (e.g. ...\\off_by_one_3.py); strip them.
+_PATH_RE = re.compile(r'[A-Za-z]:\\[^\s"]*?\.py|/[^\s"]*?\.py')
+
+
+def scrub_paths(text: str) -> str:
+    return _PATH_RE.sub("<FILE>", text)
+
 
 # Setup Paths
 CURRENT_DIR = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -49,6 +55,8 @@ class ErrorClusterer:
     @property
     def model(self):
         if self._model is None:
+            # Imported lazily: torch is heavy and is not needed by the live API on Render
+            from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer('all-MiniLM-L6-v2')
         return self._model
 
@@ -57,7 +65,7 @@ class ErrorClusterer:
         with open(DATA_PATH, 'r', encoding='utf-8') as f:
             self.dataset = json.load(f)
             
-        self.corpus = [item.get("error_raw", "") for item in self.dataset]
+        self.corpus = [scrub_paths(item.get("error_raw", "")) for item in self.dataset]
         self.concepts = [item.get("concept_label", "unknown") for item in self.dataset]
         print(f"[*] Loaded {len(self.corpus)} samples.")
 
@@ -147,6 +155,8 @@ class ErrorClusterer:
         print(f"[+] Saved cluster metrics to {METRICS_PATH}")
 
     def visualize(self):
+        import matplotlib.pyplot as plt
+        import umap
         print("\n[*] Reducing dimensions with UMAP for visualization...")
         reducer = umap.UMAP(n_components=2, random_state=42, metric='cosine')
         embedding_2d = reducer.fit_transform(self.embeddings)
@@ -193,6 +203,7 @@ class ErrorClusterer:
             if not self.corpus and DATA_PATH.exists():
                 self.load_data()
             
+        error_string = scrub_paths(error_string)
         emb = self.model.encode([error_string])
         
         # Find nearest centroid using cosine similarity
