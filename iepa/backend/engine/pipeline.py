@@ -17,7 +17,7 @@ _FEEDBACK_GEN = FeedbackGenerator()
 if not _MAPPER.load_model():
     print("[!] Warning: ConceptMapper models not found. Did you run concept_mapper.py?")
 
-def analyze(learner_id: str, error_string: str) -> dict:
+def analyze(learner_id: str, error_string: str, code: str = None) -> dict:
     """
     End-to-end analysis pipeline.
     """
@@ -32,7 +32,7 @@ def analyze(learner_id: str, error_string: str) -> dict:
     engine.load(str(state_path))
     
     # 2. Call predict_concept
-    pred = _MAPPER.predict_concept(error_string)
+    pred = _MAPPER.predict_concept(error_string, code=code)
     concept = pred["concept"]
     confidence = pred["confidence"]
     
