@@ -1,4 +1,5 @@
 import os
+import asyncio
 import sys
 import json
 from pathlib import Path
@@ -243,19 +244,21 @@ async def analyze_endpoint(
 
     try:
         # 1. Run in Sandbox
-        exec_res = executor.execute(req.code, language=req.language or "python")
+        exec_res = await asyncio.to_thread(executor.execute, req.code, language=req.language or "python")
 
         # 2. If error detected, analyze concept gap
         if exec_res.get("error_raw"):
-            result = analyze(user_id, exec_res["error_raw"])
+            result = analyze(user_id, exec_res["error_raw"], code=req.code)
             result["execution"] = exec_res
 
             # Log analysis and increment user counter in MongoDB
             if current_user:
-                await increment_analyses(user_id)
-                await log_analysis(user_id, result)
                 if "mastery_report" in result:
-                    state = await get_learner_state(user_id)
+                    _, _, state = await asyncio.gather(
+                        increment_analyses(user_id),
+                        log_analysis(user_id, result),
+                        get_learner_state(user_id),
+                    )
                     history = state.get("history", [])
                     history.append({
                         "concept": result["concept"],
@@ -265,6 +268,8 @@ async def analyze_endpoint(
                         "timestamp": datetime.now(timezone.utc).isoformat()
                     })
                     await save_learner_state(user_id, result["mastery_report"], history)
+                else:
+                    await asyncio.gather(increment_analyses(user_id), log_analysis(user_id, result))
 
             return APIResponse(success=True, data=result)
 
@@ -552,7 +557,7 @@ async def check_curriculum_code(
     engine = ScoringEngine(user_id)
 
     try:
-        result = engine.check_coding_answer(concept, question_id, req.code)
+        result = await asyncio.to_thread(engine.check_coding_answer, concept, question_id, req.code)
     except Exception as e:
         return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
 

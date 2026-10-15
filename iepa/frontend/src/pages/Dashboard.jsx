@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +34,10 @@ export default function Dashboard() {
     const [verifyingGate, setVerifyingGate] = useState(false);
     const [gateResult, setGateResult] = useState(null);
 
+    // Guards: ignore late or duplicate responses that belong to a screen the learner has already left
+    const navToken = useRef(0);
+    const submittingRef = useRef(false);
+
     const fetchHistory = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE}/learner/${learnerId}/history`);
@@ -68,22 +72,24 @@ export default function Dashboard() {
     }, [fetchHistory, fetchCurriculum]);
 
     const loadExercise = async (concept) => {
+        const token = navToken.current;
         setSubmitResult(null);
         try {
             const res = await axios.get(`${API_BASE}/curriculum/exercise/${concept}`);
-            if (res.data.success) setExerciseState(res.data.data);
+            if (res.data.success && token === navToken.current) setExerciseState(res.data.data);
         } catch (e) {
-            setExerciseState(null);
+            if (token === navToken.current) setExerciseState(null);
         }
     };
 
     const loadReview = async (concept) => {
+        const token = navToken.current;
         setExerciseState(null);
         try {
             const res = await axios.get(`${API_BASE}/curriculum/review/${concept}`);
-            if (res.data.success) setSubmitResult(res.data.data);
+            if (res.data.success && token === navToken.current) setSubmitResult(res.data.data);
         } catch (e) {
-            setSubmitResult(null);
+            if (token === navToken.current) setSubmitResult(null);
         }
     };
 
@@ -94,6 +100,7 @@ export default function Dashboard() {
     };
 
     const enterPracticeMode = async (concept) => {
+        const token = ++navToken.current;
         setActiveConcept(concept);
         setFeedbackData(null);
         setExecutionData(null);
@@ -105,7 +112,7 @@ export default function Dashboard() {
 
         try {
             const res = await axios.get(`${API_BASE}/curriculum/gate/${concept}`);
-            if (res.data.success) {
+            if (res.data.success && token === navToken.current) {
                 const pool = res.data.data.pool;
                 setGatePool(pool);
                 const chosen = pickRandom(pool, null);
@@ -113,6 +120,7 @@ export default function Dashboard() {
                 setCode(chosen.buggy_code);
             }
         } catch (e) {
+            if (token !== navToken.current) return;
             setGateActive(false);
             setGateConcept(null);
             setApiError('Could not load practice exercise for this concept.');
@@ -128,6 +136,8 @@ export default function Dashboard() {
     };
 
     const handleVerifyGate = async () => {
+        if (verifyingGate) return;
+        const token = navToken.current;
         setVerifyingGate(true);
         setGateResult(null);
         try {
@@ -136,13 +146,14 @@ export default function Dashboard() {
                 { code }
             );
             const result = res.data.data;
+            if (token !== navToken.current) return;
             setGateResult(result);
             if (result.correct) {
                 setGateActive(false);
                 await loadExercise(gateConcept);
             }
         } catch (e) {
-            setGateResult({ correct: false, error_raw: e.message });
+            if (token === navToken.current) setGateResult({ correct: false, error_raw: e.message });
         } finally {
             setVerifyingGate(false);
         }
@@ -156,7 +167,10 @@ export default function Dashboard() {
     };
 
     const handleSelectConcept = (concept) => {
+        navToken.current += 1;
         if (progress[concept]?.status === 'passed') {
+            setFeedbackData(null);
+            setExecutionData(null);
             setActiveConcept(concept);
             setGateActive(false);
             setGateConcept(null);
@@ -214,21 +228,28 @@ export default function Dashboard() {
     };
 
     const handleSubmitAnswers = async (theoryAnswer, codeResults) => {
+        if (submittingRef.current) return; // ignore double clicks while a submission is in flight
+        submittingRef.current = true;
+        const token = navToken.current;
+        const concept = activeConcept;
         try {
-            const res = await axios.post(`${API_BASE}/curriculum/submit/${activeConcept}`, {
+            const res = await axios.post(`${API_BASE}/curriculum/submit/${concept}`, {
                 theory_answer: theoryAnswer,
                 coding_results: codeResults,
             });
             if (res.data.success) {
-                setSubmitResult(res.data.data);
+                if (token === navToken.current) setSubmitResult(res.data.data);
                 fetchCurriculum();
             }
         } catch (e) {
-            setApiError(e.response?.data?.error || e.message);
+            if (token === navToken.current) setApiError(e.response?.data?.error || e.message);
+        } finally {
+            submittingRef.current = false;
         }
     };
 
     const handleContinueNext = (nextConcept) => {
+        navToken.current += 1;
         setSubmitResult(null);
         setExerciseState(null);
         if (nextConcept) {
@@ -237,6 +258,7 @@ export default function Dashboard() {
     };
 
     const handleRetry = () => {
+        navToken.current += 1;
         setSubmitResult(null);
         loadExercise(activeConcept);
     };
@@ -293,10 +315,10 @@ export default function Dashboard() {
                         <FeedbackPanel
                             feedbackData={feedbackData}
                             executionData={executionData}
-                            exerciseState={exerciseState}
+                            exerciseState={gateActive ? null : exerciseState}
                             onCheckCode={handleCheckCode}
                             onSubmitAnswers={handleSubmitAnswers}
-                            submitResult={submitResult}
+                            submitResult={gateActive ? null : submitResult}
                             onContinueNext={() => handleContinueNext(submitResult?.next_concept)}
                             onRetry={handleRetry}
                             onPracticeConcept={enterPracticeMode}

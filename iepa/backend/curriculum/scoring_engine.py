@@ -39,7 +39,7 @@ CONCEPT_ORDER = [
 class ScoringEngine:
     def __init__(self, user_id: str):
         self.user_id = user_id
-        self._executor = CodeExecutor()
+        self._executor = CodeExecutor(timeout=5)
 
     # ------------------------------------------------------------------
     # Progress loading/saving (async — Mongo + local JSON fallback)
